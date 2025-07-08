@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Build: Linux/macOS",
+			"command": "./build.sh",
+			"group": "build",
+		},
+		{
+			"type": "shell",
+			"label": "Build: Windows",
+			"command": "build.bat",
+			"group": "build",
+		},
+		{
+			"type": "shell",
+			"label": "Clean: Linux/macOS",
+			"command": "./clean.sh",
+			"group": "build",
+		},
+		{
+			"type": "shell",
+			"label": "Clean: Windows",
+			"command": "clean.bat",
+			"group": "build",
+		}
+	]
+}
