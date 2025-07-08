@@ -10,12 +10,8 @@ TODO: Add project description.
 - GNU tools, (**gcc**, **g++**, **gdb**, **make**). Most linux distros already have them included. For Ubuntu: `sudo apt-get install build-essential`.
 
 ### For Windows
-- [MSYS2](https://www.msys2.org): Used to get GNU tools. Install latest version. Alternatively, install [Cygwin](https://www.cygwin.com) or [MinGW](https://www.mingw-w64.org) directly.
-  - Install toolchain: 
-  ```bash
-    pacman -S --needed base-devel mingw-w64-ucrt-x86_64-toolchain
-  ```
-- [Setting up VSCode development environment in Windows](https://code.visualstudio.com/docs/languages/cpp). **IMPORTANT:** Follow the instructions on [how to install MinGW-x64 on Windows](https://code.visualstudio.com/docs/languages/cpp#_example-install-mingwx64-on-windows), including updating the PATH variable to get access to the utilities.
+- [Setting up VSCode development environment in Windows](https://code.visualstudio.com/docs/languages/cpp). **IMPORTANT:** Follow the instructions on [how to install MinGW-x64 on Windows](https://code.visualstudio.com/docs/languages/cpp#_example-install-mingwx64-on-windows), including updating the PATH variable to get access to the utilities, and installing the development toolchain.
+  - [MSYS2](https://www.msys2.org): Used to get GNU tools. Install latest version. Alternatively, install [Cygwin](https://www.cygwin.com) or [MinGW](https://www.mingw-w64.org) directly.
 
 
 ## Building project
