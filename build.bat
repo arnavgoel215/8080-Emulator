@@ -4,6 +4,7 @@ if not exist build (
 )
 
 cd build
-cmake ..
-make
+@REM Use MinGW Generator, otherwise the default one is Visual Studio.
+cmake .. -G "MinGW Makefiles"
+cmake --build . --parallel
 cd ..

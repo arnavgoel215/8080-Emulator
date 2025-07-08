@@ -28,10 +28,8 @@ target_include_directories(controller
 # Test executable.
 # NOTE I: Use this executable only for development, 
 # since the project will use the static library instead.
-# NOTE II: Using .exe extension even if we're on linux,
-# Just to keep consistency with debug configurations.
-add_executable(controller_main.exe controller_main.cpp)
-target_link_libraries(controller_main.exe
+add_executable(controller_main controller_main.cpp)
+target_link_libraries(controller_main
     PUBLIC
     controller
 )

@@ -5,5 +5,5 @@ fi
 
 cd build
 cmake ..
-make
+cmake --build . --parallel
 cd ..

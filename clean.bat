@@ -1,5 +1,5 @@
 if exist build (
     cd build
-    mkdir build
+    cmake --build . -- clean
     cd ..
 )

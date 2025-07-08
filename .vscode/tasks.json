@@ -10,7 +10,7 @@
 		{
 			"type": "shell",
 			"label": "Build: Windows",
-			"command": "build.bat",
+			"command": "./build.bat",
 			"group": "build",
 		},
 		{
@@ -22,7 +22,7 @@
 		{
 			"type": "shell",
 			"label": "Clean: Windows",
-			"command": "clean.bat",
+			"command": "./clean.bat",
 			"group": "build",
 		}
 	]
