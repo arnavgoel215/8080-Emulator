@@ -1,0 +1,1 @@
+# TODO: View is configured with Qt, so the project will be slightly different.
