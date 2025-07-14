@@ -44,19 +44,6 @@ struct CPUState
 };
 
 /**
- * @brief An enumeration of all possible game inputs.
- * Used by the Controller to report key presses to the model.
- */
-enum class GameInput
-{
-    Coin,
-    P1_Start,
-    P1_Shoot,
-    P1_Left,
-    P1_Right,
-};
-
-/**
  * @brief The main class for the 8080 emulation model.
  */
 class Emulator
@@ -86,15 +73,6 @@ public:
      * @param interrupt_num The interrupt number (1 or 2 for Space Invaders).
      */
     void requestInterrupt(uint8_t interrupt_num);
-
-    // --- Data Input from Controller ---
-
-    /**
-     * @brief Updates the state of a game control.
-     * @param input The specific game input being changed.
-     * @param isPressed The state of the input (true for pressed, false for released).
-     */
-    void setInputState(GameInput input, bool isPressed);
 
     // --- Data Output to Controller ---
 

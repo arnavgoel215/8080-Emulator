@@ -21,6 +21,19 @@
 class MainView; 
 
 /**
+ * @brief An enumeration of all possible game inputs.
+ * Used by the Controller to report key presses to the model.
+ */
+enum class GameInput
+{
+    Coin,
+    P1_Start,
+    P1_Shoot,
+    P1_Left,
+    P1_Right,
+};
+
+/**
  * @brief The Controller class, responsible for application logic.
  */
 class Controller
@@ -57,6 +70,13 @@ public:
      * @param isPressed The state of the key (true for pressed, false for released).
      */
     void on_keyEvent(int key, bool isPressed);
+
+    /**
+     * @brief Updates the state of a game control.
+     * @param input The specific game input being changed.
+     * @param isPressed The state of the input (true for pressed, false for released).
+     */
+    void setInputState(GameInput input, bool isPressed);
 
     // --- Main Emulation Loop ---
 
