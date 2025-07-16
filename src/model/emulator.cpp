@@ -86,6 +86,20 @@ void Emulator::executeInstruction()
     }
 }
 
+void Emulator::add(uint8_t val)
+{
+    uint8_t *a = &state.a;
+    bool *cy = &state.flags.cy;
+    bool *ac = &state.flags.ac;
+
+    uint16_t result = *a + val;
+    *cy = result > 0xFF;
+    *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
+    *a = result & 0xFF;
+
+    setFlags(*a);
+}
+
 void Emulator::requestInterrupt(uint8_t interrupt_num)
 {
     // TODO: Implement interrupt handling
@@ -104,4 +118,11 @@ const uint8_t* Emulator::getFrameBuffer() const
         return &memory[0x2400];
     }
     return nullptr;
+}
+
+void Emulator::setFlags(uint8_t result)
+{
+    state.flags.z = (result == 0);
+    state.flags.s = (result & 0x80);
+    state.flags.p = __builtin_parity(result);
 }

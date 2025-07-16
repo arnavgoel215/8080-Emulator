@@ -112,6 +112,16 @@ private:
      * @brief Fetches, decodes, and executes a single instruction from memory.
      */
     void executeInstruction();
+
+    /**
+     * @brief Executes the ADD instruction
+     */
+    void add(uint8_t val);
+
+    /**
+     * @brief Sets flags based on result of executing instruction
+     */
+    void setFlags(uint8_t result);
 };
 
 #endif /* EMULATOR_HPP_ */
