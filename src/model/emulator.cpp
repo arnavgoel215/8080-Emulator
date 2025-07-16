@@ -75,6 +75,14 @@ void Emulator::executeInstruction()
             break;
 
         // TODO: Add other opcodes here
+        case 0x80: add(state.b); break;  // ADD B
+        case 0x81: add(state.c); break;  // ADD C
+        case 0x82: add(state.d); break;  // ADD D
+        case 0x83: add(state.e); break;  // ADD E
+        case 0x84: add(state.h); break;  // ADD H
+        case 0x85: add(state.l); break;  // ADD L
+        case 0x86: add(memory[hl()]); break;  // ADD M
+        case 0x87: add(state.a); break;  // ADD A
 
         default:
             std::cerr << "Error: Unimplemented opcode " 
@@ -125,4 +133,9 @@ void Emulator::setFlags(uint8_t result)
     state.flags.z = (result == 0);
     state.flags.s = (result & 0x80);
     state.flags.p = __builtin_parity(result);
+}
+
+uint16_t Emulator::hl() const
+{
+    return (state.h << 8) | state.l;
 }

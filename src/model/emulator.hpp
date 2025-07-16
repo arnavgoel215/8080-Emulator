@@ -122,6 +122,11 @@ private:
      * @brief Sets flags based on result of executing instruction
      */
     void setFlags(uint8_t result);
+
+    /**
+     * @brief Returns the value of the 16 bit register pair of h and l
+     */
+    uint16_t hl() const;
 };
 
 #endif /* EMULATOR_HPP_ */
