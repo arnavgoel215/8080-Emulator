@@ -69,10 +69,7 @@ void Emulator::executeInstruction()
 
     switch (opcode)
     {
-        case 0x00: // NOP (No Operation)
-            // Does nothing but consume a cycle and advance the PC.
-            // PC is already advanced, so we do nothing.
-            break;
+        case 0x00: op_NOP(); break;
 
         // TODO: Add other opcodes here
 
@@ -85,6 +82,13 @@ void Emulator::executeInstruction()
             break;
     }
 }
+
+void Emulator::op_NOP()
+{
+    // Does nothing but consume a cycle and advance the PC.
+    // PC is already advanced, so we do nothing.
+}
+
 
 void Emulator::requestInterrupt(uint8_t interrupt_num)
 {

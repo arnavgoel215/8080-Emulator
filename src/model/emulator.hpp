@@ -112,6 +112,9 @@ private:
      * @brief Fetches, decodes, and executes a single instruction from memory.
      */
     void executeInstruction();
+
+    // --- Opcode Functions ---
+    void op_NOP();
 };
 
 #endif /* EMULATOR_HPP_ */
