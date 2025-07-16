@@ -52,6 +52,11 @@ public:
     // --- Lifecycle and Control ---
 
     /**
+     * @brief Default constructor. Initializes the CPU state.
+     */
+    Emulator();
+
+    /**
      * @brief Loads a ROM file's contents into the emulator's memory.
      * @param romData A vector of bytes containing the ROM file.
      */
@@ -87,6 +92,26 @@ public:
      * @return A constant pointer to the start of the 7KB video RAM buffer.
      */
     const uint8_t* getFrameBuffer() const;
+
+private:
+    // --- Internal CPU State ---
+    
+    /**
+     * @brief The current state of the CPU registers and flags.
+     */
+    CPUState state;
+
+    /**
+     * @brief The 64KB memory space of the 8080.
+     */
+    std::vector<uint8_t> memory;
+
+    // --- Helper Functions ---
+
+    /**
+     * @brief Fetches, decodes, and executes a single instruction from memory.
+     */
+    void executeInstruction();
 };
 
 #endif /* EMULATOR_HPP_ */
