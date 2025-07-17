@@ -174,7 +174,8 @@ void Emulator::op_ADC(uint8_t val)
 }
 
 // 0x90 to 0x97 SUB
-void Emulator::op_SUB(uint8_t val) {
+void Emulator::op_SUB(uint8_t val) 
+{
     // Pointers to register A and to flags CY and AC
     uint8_t *a = &state.a;  // Register A
     bool *cy = &state.flags.cy;  // Carry flag
