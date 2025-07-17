@@ -89,6 +89,14 @@ void Emulator::executeInstruction()
         case 0x8D: op_ADC(state.l); break;  // ADC L
         case 0x8E: op_ADC(memory[hl()]); break;  // ADC M
         case 0x8F: op_ADC(state.a); break;  // ADC A
+        case 0x90: op_SUB(state.b); break;  // SUB B
+        case 0x91: op_SUB(state.c); break;  // SUB C
+        case 0x92: op_SUB(state.d); break;  // SUB D
+        case 0x93: op_SUB(state.e); break;  // SUB E
+        case 0x94: op_SUB(state.h); break;  // SUB H
+        case 0x95: op_SUB(state.h); break;  // SUB L
+        case 0x96: op_SUB(memory[hl()]); break;  // SUB M
+        case 0x97: op_SUB(state.a); break;  // SUB A
 
         default:
             std::cerr << "Error: Unimplemented opcode " 
