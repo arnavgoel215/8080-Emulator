@@ -92,8 +92,10 @@ void Emulator::executeInstruction()
     }
 }
 
+// 0x80 to 0x87: ADD
 void Emulator::op_ADD(uint8_t val)
 {
+    // Pointers to register A and to flags CY and AC
     uint8_t *a = &state.a;
     bool *cy = &state.flags.cy;
     bool *ac = &state.flags.ac;
@@ -128,7 +130,7 @@ const uint8_t* Emulator::getFrameBuffer() const
 
 void Emulator::setFlags(uint8_t result)
 {
-    // Flags Z, S and P get set based on value passed in
+    // Flags Z, S and P get set based on final result of operation
     state.flags.z = (result == 0);
     state.flags.s = (result & 0x80);
     state.flags.p = __builtin_parity(result);
@@ -137,4 +139,18 @@ void Emulator::setFlags(uint8_t result)
 uint16_t Emulator::hl() const
 {
     return (state.h << 8) | state.l;
+}
+
+void Emulator::op_ADC(uint8_t val)
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;
+    bool *cy = &state.flags.cy;
+    bool *ac = &state.flags.ac;
+
+    uint16_t result = *a + val + (*cy ? 1 : 0);
+    *cy = result > 0xFF;
+    *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
+    *a = result & 0xFF;
+    setFlags(*a);
 }

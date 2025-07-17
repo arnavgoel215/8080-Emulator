@@ -127,6 +127,11 @@ private:
      * @brief Returns the value of the 16 bit register pair for registers H and L
      */
     uint16_t hl() const;
+
+    /**
+     * @brief Executes the ADC instruction
+     */
+    void op_ADC(uint8_t val);
 };
 
 #endif /* EMULATOR_HPP_ */
