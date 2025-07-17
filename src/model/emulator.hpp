@@ -124,7 +124,7 @@ private:
     void setFlags(uint8_t result);
 
     /**
-     * @brief Returns the value of the 16 bit register pair of h and l
+     * @brief Returns the value of the 16 bit register pair for registers H and L
      */
     uint16_t hl() const;
 };

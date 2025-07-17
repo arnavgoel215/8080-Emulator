@@ -130,6 +130,7 @@ const uint8_t* Emulator::getFrameBuffer() const
 
 void Emulator::setFlags(uint8_t result)
 {
+    // Flags Z, S and P get set based on value passed in
     state.flags.z = (result == 0);
     state.flags.s = (result & 0x80);
     state.flags.p = __builtin_parity(result);
