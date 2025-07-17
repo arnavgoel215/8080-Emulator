@@ -73,16 +73,14 @@ void Emulator::executeInstruction()
             // Does nothing but consume a cycle and advance the PC.
             // PC is already advanced, so we do nothing.
             break;
-
-        // TODO: Add other opcodes here
-        case 0x80: add(state.b); break;  // ADD B
-        case 0x81: add(state.c); break;  // ADD C
-        case 0x82: add(state.d); break;  // ADD D
-        case 0x83: add(state.e); break;  // ADD E
-        case 0x84: add(state.h); break;  // ADD H
-        case 0x85: add(state.l); break;  // ADD L
-        case 0x86: add(memory[hl()]); break;  // ADD M
-        case 0x87: add(state.a); break;  // ADD A
+        case 0x80: op_ADD(state.b); break;  // ADD B
+        case 0x81: op_ADD(state.c); break;  // ADD C
+        case 0x82: op_ADD(state.d); break;  // ADD D
+        case 0x83: op_ADD(state.e); break;  // ADD E
+        case 0x84: op_ADD(state.h); break;  // ADD H
+        case 0x85: op_ADD(state.l); break;  // ADD L
+        case 0x86: op_ADD(memory[hl()]); break;  // ADD M
+        case 0x87: op_ADD(state.a); break;  // ADD A
 
         default:
             std::cerr << "Error: Unimplemented opcode " 
@@ -94,7 +92,7 @@ void Emulator::executeInstruction()
     }
 }
 
-void Emulator::add(uint8_t val)
+void Emulator::op_ADD(uint8_t val)
 {
     uint8_t *a = &state.a;
     bool *cy = &state.flags.cy;

@@ -116,7 +116,7 @@ private:
     /**
      * @brief Executes the ADD instruction
      */
-    void add(uint8_t val);
+    void op_ADD(uint8_t val);
 
     /**
      * @brief Sets flags based on result of executing instruction
