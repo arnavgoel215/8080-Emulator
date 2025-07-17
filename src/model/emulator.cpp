@@ -100,22 +100,6 @@ void Emulator::executeInstruction()
     }
 }
 
-// 0x80 to 0x87: ADD
-void Emulator::op_ADD(uint8_t val)
-{
-    // Pointers to register A and to flags CY and AC
-    uint8_t *a = &state.a;
-    bool *cy = &state.flags.cy;
-    bool *ac = &state.flags.ac;
-
-    uint16_t result = *a + val;
-    *cy = result > 0xFF;
-    *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
-    *a = result & 0xFF;
-
-    setFlags(*a);
-}
-
 void Emulator::requestInterrupt(uint8_t interrupt_num)
 {
     // TODO: Implement interrupt handling
@@ -149,16 +133,49 @@ uint16_t Emulator::hl() const
     return (state.h << 8) | state.l;
 }
 
+// 0x80 to 0x87: ADD
+void Emulator::op_ADD(uint8_t val)
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary carry flag
+
+    uint16_t result = *a + val;
+    *cy = result > 0xFF;
+    *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+
+    setFlags(*a);
+}
+
+// 0x88 to 0x8F: ADC
 void Emulator::op_ADC(uint8_t val)
 {
     // Pointers to register A and to flags CY and AC
-    uint8_t *a = &state.a;
-    bool *cy = &state.flags.cy;
-    bool *ac = &state.flags.ac;
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary flag
 
     uint16_t result = *a + val + (*cy ? 1 : 0);
     *cy = result > 0xFF;
     *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
-    *a = result & 0xFF;
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+
+    setFlags(*a);
+}
+
+// 0x90 to 0x97 SUB
+void Emulator::op_SUB(uint8_t val) {
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary carry flag
+
+    uint16_t result = *a - val;
+    *cy = (*a < val);
+    *ac = ((*a & 0x0F) < (val & 0x0F));
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+
     setFlags(*a);
 }

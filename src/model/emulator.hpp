@@ -132,6 +132,11 @@ private:
      * @brief Executes the ADC instruction
      */
     void op_ADC(uint8_t val);
+
+    /**
+     * @brief Executes the SUB instruction
+     */
+    void op_SUB(uint8_t val);
 };
 
 #endif /* EMULATOR_HPP_ */
