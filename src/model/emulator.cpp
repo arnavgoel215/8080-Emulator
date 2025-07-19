@@ -3,7 +3,7 @@
  * 
  * @brief Implementation of the 8080 emulator core.
  * 
- * @author: Jesse
+ * @author: Jesse, Arnav
  * 
  *********************************************************/
 
