@@ -1,4 +1,8 @@
 build
 out
+
+# Exclude all test files and folders
+**/test/
+**/tests/
 .env
 /rom/
