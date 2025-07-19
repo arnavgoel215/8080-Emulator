@@ -3,7 +3,7 @@
  * 
  * @brief Implementation of the 8080 emulator core.
  * 
- * @author: <TODO: ADD AUTHOR>
+ * @author: Jesse
  * 
  *********************************************************/
 
@@ -65,14 +65,11 @@ void Emulator::emulateCycles(int cycles)
 void Emulator::executeInstruction()
 {
     uint8_t opcode = memory[state.pc];
-    state.pc++;
+    // PC is incremented in the opcode function
 
     switch (opcode)
     {
-        case 0x00: // NOP (No Operation)
-            // Does nothing but consume a cycle and advance the PC.
-            // PC is already advanced, so we do nothing.
-            break;
+        case 0x00: op_NOP(); break;
         case 0x80: op_ADD(state.b); break;  // ADD B
         case 0x81: op_ADD(state.c); break;  // ADD C
         case 0x82: op_ADD(state.d); break;  // ADD D
@@ -129,13 +126,81 @@ void Emulator::executeInstruction()
         case 0xB5: op_ORA(state.l); break;  // ORA L
         case 0xB6: op_ORA(memory[hl()]); break;  // ORA M
         case 0xB7: op_ORA(state.a); break;  // ORA A
+        case 0x01: op_LXI_B(); break;
+        case 0x02: op_STAX_B(); break;
+        case 0x03: op_INX_B(); break;
+        case 0x04: op_INR_B(); break;
+        case 0x05: op_DCR_B(); break;
+        case 0x06: op_MVI_B(); break;
+        case 0x07: op_RLC(); break;
+        case 0x09: op_DAD_B(); break;
+        case 0x0a: op_LDAX_B(); break;
+        case 0x0b: op_DCX_B(); break;
+        case 0x0c: op_INR_C(); break;
+        case 0x0d: op_DCR_C(); break;
+        case 0x0e: op_MVI_C(); break;
+        case 0x0f: op_RRC(); break;
+        case 0x11: op_LXI_D(); break;
+        case 0x12: op_STAX_D(); break;
+        case 0x13: op_INX_D(); break;
+        case 0x14: op_INR_D(); break;
+        case 0x15: op_DCR_D(); break;
+        case 0x16: op_MVI_D(); break;
+        case 0x19: op_DAD_D(); break;
+        case 0x1a: op_LDAX_D(); break;
+        case 0x1b: op_DCX_D(); break;
+        case 0x1c: op_INR_E(); break;
+        case 0x1d: op_DCR_E(); break;
+        case 0x1e: op_MVI_E(); break;
+        case 0x1f: op_RAR(); break;
+        case 0x21: op_LXI_H(); break;
+        case 0x22: op_SHLD(); break;
+        case 0x23: op_INX_H(); break;
+        case 0x24: op_INR_H(); break;
+        case 0x25: op_DCR_H(); break;
+        case 0x26: op_MVI_H(); break;
+        case 0x27: op_DAA(); break;
+        case 0x29: op_DAD_H(); break;
+        case 0x2a: op_LHLD(); break;
+        case 0x2b: op_DCX_H(); break;
+        case 0x2c: op_INR_L(); break;
+        case 0x2e: op_MVI_L(); break;
+        case 0x2f: op_CMA(); break;
+        case 0x31: op_LXI_SP(); break;
+        case 0x32: op_STA(); break;
+        case 0x34: op_INR_M(); break;
+        case 0x35: op_DCR_M(); break;
+        case 0x36: op_MVI_M(); break;
+        case 0x37: op_STC(); break;
+        case 0x39: op_DAD_SP(); break;
+        case 0x3a: op_LDA(); break;
+        case 0x3c: op_INR_A(); break;
+        case 0x3d: op_DCR_A(); break;
+        case 0x3e: op_MVI_A(); break;
+        case 0x3f: op_CMC(); break;
+        case 0x76: op_HLT(); break;
+        case 0xc1: op_POP_B(); break;
+        case 0xc3: op_JMP(); break;
+        case 0xc5: op_PUSH_B(); break;
+        case 0xc9: op_RET(); break;
+        case 0xcd: op_CALL(); break;
+        case 0xd1: op_POP_D(); break;
+        case 0xd5: op_PUSH_D(); break;
+        case 0xe1: op_POP_H(); break;
+        case 0xe3: op_XTHL(); break;
+        case 0xe5: op_PUSH_H(); break;
+        case 0xe9: op_PCHL(); break;
+        case 0xeb: op_XCHG(); break;
+        case 0xf1: op_POP_PSW(); break;
+        case 0xf5: op_PUSH_PSW(); break;
+        case 0xfb: op_EI(); break;
 
         default:
             std::cerr << "Error: Unimplemented opcode " 
                       << std::hex << static_cast<int>(opcode) 
-                      << " at address " << std::hex << (state.pc - 1) 
+                      << " at address " << std::hex << (state.pc) 
                       << std::endl;
-            // In a real scenario, we might want to halt or handle this error differently.
+            state.pc++; // Advance past the unknown opcode
             break;
     }
 }
@@ -238,10 +303,623 @@ void Emulator::op_ORA(uint8_t val)
 }
 
 
+// Data Transfer Group
+// 0x01: LXI B,d16
+void Emulator::op_LXI_B()
+{ 
+    state.c = memory[state.pc + 1];
+    state.b = memory[state.pc + 2];
+    state.pc += 3;
+}
+// 0x02: STAX B
+void Emulator::op_STAX_B()
+{
+    uint16_t addr = (state.b << 8) | state.c;
+    memory[addr] = state.a;
+    state.pc += 1;
+}
+// 0x06: MVI B,d8
+void Emulator::op_MVI_B()
+{
+    state.b = memory[state.pc + 1];
+    state.pc += 2;
+}
+// 0x0A: LDAX B
+void Emulator::op_LDAX_B()
+{
+    uint16_t addr = (state.b << 8) | state.c;
+    state.a = memory[addr];
+    state.pc += 1;
+}
+// 0x0E: MVI C,d8
+void Emulator::op_MVI_C()
+{
+    state.c = memory[state.pc + 1];
+    state.pc += 2;
+}
+// 0x11: LXI D,d16
+void Emulator::op_LXI_D()
+{
+    state.e = memory[state.pc + 1];
+    state.d = memory[state.pc + 2];
+    state.pc += 3;
+}
+// 0x12: STAX D
+void Emulator::op_STAX_D()
+{
+    uint16_t addr = (state.d << 8) | state.e;
+    memory[addr] = state.a;
+    state.pc += 1;
+}
+// 0x16: MVI D,d8
+void Emulator::op_MVI_D()
+{
+    state.d = memory[state.pc + 1];
+    state.pc += 2;
+}
+// 0x1A: LDAX D
+void Emulator::op_LDAX_D()
+{
+    uint16_t addr = (state.d << 8) | state.e;
+    state.a = memory[addr];
+    state.pc += 1;
+}
+// 0x1E: MVI E,d8
+void Emulator::op_MVI_E()
+{
+    state.e = memory[state.pc + 1];
+    state.pc += 2;
+}
+// 0x21: LXI H,d16
+void Emulator::op_LXI_H()
+{
+    state.l = memory[state.pc + 1];
+    state.h = memory[state.pc + 2];
+    state.pc += 3;
+}
+// 0x22: SHLD addr
+void Emulator::op_SHLD()
+{
+    uint16_t addr = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
+    memory[addr] = state.l;
+    memory[addr + 1] = state.h;
+    state.pc += 3;
+}
+// 0x26: MVI H,d8
+void Emulator::op_MVI_H()
+{
+    state.h = memory[state.pc + 1];
+    state.pc += 2;
+}
+// 0x2A: LHLD addr
+void Emulator::op_LHLD()
+{
+    uint16_t addr = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
+    state.l = memory[addr];
+    state.h = memory[addr + 1];
+    state.pc += 3;
+}
+// 0x2E: MVI L,d8
+void Emulator::op_MVI_L()
+{
+    state.l = memory[state.pc + 1];
+    state.pc += 2;
+}
+// 0x31: LXI SP,d16
+void Emulator::op_LXI_SP()
+{
+    state.sp = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
+    state.pc += 3;
+}
+// 0x32: STA addr
+void Emulator::op_STA()
+{
+    uint16_t addr = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
+    memory[addr] = state.a;
+    state.pc += 3;
+}
+// 0x36: MVI M,d8
+void Emulator::op_MVI_M()
+{
+    uint16_t addr = (state.h << 8) | state.l;
+    memory[addr] = memory[state.pc + 1];
+    state.pc += 2;
+}
+// 0x3A: LDA addr
+void Emulator::op_LDA()
+{
+    uint16_t addr = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
+    state.a = memory[addr];
+    state.pc += 3;
+}
+// 0x3E: MVI A,d8
+void Emulator::op_MVI_A()
+{
+    state.a = memory[state.pc + 1];
+    state.pc += 2;
+}
+// 0xEB: XCHG
+void Emulator::op_XCHG()
+{
+    std::swap(state.h, state.d);
+    std::swap(state.l, state.e);
+    state.pc += 1;
+}
+
+// Arithmetic Group
+// 0x03: INX B
+void Emulator::op_INX_B()
+{
+    uint16_t bc = (state.b << 8) | state.c;
+    bc++;
+    state.b = (bc >> 8) & 0xFF;
+    state.c = bc & 0xFF;
+    state.pc += 1;
+}
+// 0x04: INR B
+void Emulator::op_INR_B()
+{
+    uint8_t result = state.b + 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.b & 0x0F) + 1) > 0x0F;
+    state.b = result;
+    state.pc += 1;
+}
+// 0x05: DCR B
+void Emulator::op_DCR_B()
+{
+    uint8_t result = state.b - 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.b & 0x0F) - 1) < 0;
+    state.b = result;
+    state.pc += 1;
+}
+// 0x09: DAD B
+void Emulator::op_DAD_B()
+{
+    uint16_t hl = (state.h << 8) | state.l;
+    uint16_t bc = (state.b << 8) | state.c;
+    uint32_t result = hl + bc;
+    state.flags.cy = (result > 0xFFFF);
+    hl = result & 0xFFFF;
+    state.h = (hl >> 8) & 0xFF;
+    state.l = hl & 0xFF;
+    state.pc += 1;
+}
+// 0x0B: DCX B
+void Emulator::op_DCX_B()
+{
+    uint16_t bc = (state.b << 8) | state.c;
+    bc--;
+    state.b = (bc >> 8) & 0xFF;
+    state.c = bc & 0xFF;
+    state.pc += 1;
+}
+// 0x0C: INR C
+void Emulator::op_INR_C()
+{
+    uint8_t result = state.c + 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.c & 0x0F) + 1) > 0x0F;
+    state.c = result;
+    state.pc += 1;
+}
+// 0x0D: DCR C
+void Emulator::op_DCR_C()
+{
+    uint8_t result = state.c - 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.c & 0x0F) - 1) < 0;
+    state.c = result;
+    state.pc += 1;
+}
+// 0x13: INX D
+void Emulator::op_INX_D()
+{
+    uint16_t de = (state.d << 8) | state.e;
+    de++;
+    state.d = (de >> 8) & 0xFF;
+    state.e = de & 0xFF;
+    state.pc += 1;
+}
+// 0x14: INR D
+void Emulator::op_INR_D()
+{
+    uint8_t result = state.d + 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.d & 0x0F) + 1) > 0x0F;
+    state.d = result;
+    state.pc += 1;
+}
+// 0x15: DCR D
+void Emulator::op_DCR_D()
+{
+    uint8_t result = state.d - 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.d & 0x0F) - 1) < 0;
+    state.d = result;
+    state.pc += 1;
+}
+// 0x19: DAD D
+void Emulator::op_DAD_D()
+{
+    uint16_t hl = (state.h << 8) | state.l;
+    uint16_t de = (state.d << 8) | state.e;
+    uint32_t result = hl + de;
+    state.flags.cy = (result > 0xFFFF);
+    hl = result & 0xFFFF;
+    state.h = (hl >> 8) & 0xFF;
+    state.l = hl & 0xFF;
+    state.pc += 1;
+}
+// 0x1B: DCX D
+void Emulator::op_DCX_D()
+{
+    uint16_t de = (state.d << 8) | state.e;
+    de--;
+    state.d = (de >> 8) & 0xFF;
+    state.e = de & 0xFF;
+    state.pc += 1;
+}
+// 0x1C: INR E
+void Emulator::op_INR_E()
+{
+    uint8_t result = state.e + 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.e & 0x0F) + 1) > 0x0F;
+    state.e = result;
+    state.pc += 1;
+}
+// 0x1D: DCR E
+void Emulator::op_DCR_E()
+{
+    uint8_t result = state.e - 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.e & 0x0F) - 1) < 0;
+    state.e = result;
+    state.pc += 1;
+}
+// 0x23: INX H
+void Emulator::op_INX_H()
+{
+    uint16_t hl = (state.h << 8) | state.l;
+    hl++;
+    state.h = (hl >> 8) & 0xFF;
+    state.l = hl & 0xFF;
+    state.pc += 1;
+}
+// 0x24: INR H
+void Emulator::op_INR_H()
+{
+    uint8_t result = state.h + 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.h & 0x0F) + 1) > 0x0F;
+    state.h = result;
+    state.pc += 1;
+}
+// 0x25: DCR H
+void Emulator::op_DCR_H()
+{
+    uint8_t result = state.h - 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.h & 0x0F) - 1) < 0;
+    state.h = result;
+    state.pc += 1;
+}
+// 0x27: DAA
+void Emulator::op_DAA()
+{
+    uint8_t lsb = state.a & 0x0F;
+    uint8_t msb = state.a >> 4;
+    uint8_t correction = 0;
+
+    if (state.flags.ac || lsb > 9)
+    {
+        correction += 0x06;
+    }
+
+    if (state.flags.cy || msb > 9 || (msb >= 9 && lsb > 9))
+    {
+        correction += 0x60;
+        state.flags.cy = true;
+    }
+
+    uint16_t result = state.a + correction;
+    state.a = result & 0xFF;
+    state.flags.z = (state.a == 0);
+    state.flags.s = ((state.a & 0x80) != 0);
+    state.flags.p = __builtin_parity(state.a);
+    state.flags.ac = ((state.a & 0x0F) < (lsb & 0x0F));
+    state.pc += 1;
+}
+// 0x29: DAD H
+void Emulator::op_DAD_H()
+{
+    uint16_t hl = (state.h << 8) | state.l;
+    uint32_t result = hl + hl;
+    state.flags.cy = (result > 0xFFFF);
+    hl = result & 0xFFFF;
+    state.h = (hl >> 8) & 0xFF;
+    state.l = hl & 0xFF;
+    state.pc += 1;
+}
+// 0x2B: DCX H
+void Emulator::op_DCX_H()
+{
+    uint16_t hl = (state.h << 8) | state.l;
+    hl--;
+    state.h = (hl >> 8) & 0xFF;
+    state.l = hl & 0xFF;
+    state.pc += 1;
+}
+// 0x2C: INR L
+void Emulator::op_INR_L()
+{
+    uint8_t result = state.l + 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.l & 0x0F) + 1) > 0x0F;
+    state.l = result;
+    state.pc += 1;
+}
+// 0x34: INR M
+void Emulator::op_INR_M()
+{
+    uint16_t addr = (state.h << 8) | state.l;
+    uint8_t result = memory[addr] + 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((memory[addr] & 0x0F) + 1) > 0x0F;
+    memory[addr] = result;
+    state.pc += 1;
+}
+// 0x35: DCR M
+void Emulator::op_DCR_M()
+{
+    uint16_t addr = (state.h << 8) | state.l;
+    uint8_t result = memory[addr] - 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((memory[addr] & 0x0F) - 1) < 0;
+    memory[addr] = result;
+    state.pc += 1;
+}
+// 0x39: DAD SP
+void Emulator::op_DAD_SP()
+{
+    uint16_t hl = (state.h << 8) | state.l;
+    uint32_t result = hl + state.sp;
+    state.flags.cy = (result > 0xFFFF);
+    hl = result & 0xFFFF;
+    state.h = (hl >> 8) & 0xFF;
+    state.l = hl & 0xFF;
+    state.pc += 1;
+}
+// 0x3C: INR A
+void Emulator::op_INR_A()
+{
+    uint8_t result = state.a + 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.a & 0x0F) + 1) > 0x0F;
+    state.a = result;
+    state.pc += 1;
+}
+// 0x3D: DCR A
+void Emulator::op_DCR_A()
+{
+    uint8_t result = state.a - 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.a & 0x0F) - 1) < 0;
+    state.a = result;
+    state.pc += 1;
+}
+
+// Logical Group
+// 0x07: RLC
+void Emulator::op_RLC()
+{
+    state.flags.cy = (state.a & 0x80) != 0;
+    state.a = (state.a << 1) | (state.a >> 7);
+    state.pc += 1;
+}
+// 0x0F: RRC
+void Emulator::op_RRC()
+{
+    state.flags.cy = (state.a & 0x01) != 0;
+    state.a = (state.a >> 1) | (state.a << 7);
+    state.pc += 1;
+}
+// 0x1F: RAR
+void Emulator::op_RAR()
+{
+    bool old_cy = state.flags.cy;
+    state.flags.cy = (state.a & 0x01) != 0;
+    state.a = (state.a >> 1) | (old_cy ? 0x80 : 0x00);
+    state.pc += 1;
+}
+// 0x2F: CMA
+void Emulator::op_CMA()
+{
+    state.a = ~state.a;
+    state.pc += 1;
+}
+// 0x37: STC
+void Emulator::op_STC()
+{
+    state.flags.cy = true;
+    state.pc += 1;
+}
+// 0x3F: CMC
+void Emulator::op_CMC()
+{
+    state.flags.cy = !state.flags.cy;
+    state.pc += 1;
+}
+
+// Branch Group
+// 0xC3: JMP addr
+void Emulator::op_JMP()
+{
+    state.pc = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
+}
+// 0xC9: RET
+void Emulator::op_RET()
+{
+    state.pc = (memory[state.sp + 1] << 8) | memory[state.sp];
+    state.sp += 2;
+}
+// 0xCD: CALL addr
+void Emulator::op_CALL()
+{
+    uint16_t ret_addr = state.pc + 3;
+    memory[state.sp - 1] = (ret_addr >> 8) & 0xFF;
+    memory[state.sp - 2] = ret_addr & 0xFF;
+    state.sp -= 2;
+    state.pc = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
+}
+// 0xE9: PCHL
+void Emulator::op_PCHL()
+{
+    state.pc = (state.h << 8) | state.l;
+}
+
+// Stack, I/O, and Machine Control Group
+// 0x00: NOP
+void Emulator::op_NOP() { state.pc += 1; }
+// 0x76: HLT
+void Emulator::op_HLT()
+{
+    // For this emulator, HLT is a NOP
+    state.pc += 1;
+}
+// 0xC1: POP B
+void Emulator::op_POP_B()
+{
+    state.c = memory[state.sp];
+    state.b = memory[state.sp + 1];
+    state.sp += 2;
+    state.pc += 1;
+}
+// 0xC5: PUSH B
+void Emulator::op_PUSH_B()
+{
+    memory[state.sp - 1] = state.b;
+    memory[state.sp - 2] = state.c;
+    state.sp -= 2;
+    state.pc += 1;
+}
+// 0xD1: POP D
+void Emulator::op_POP_D()
+{
+    state.e = memory[state.sp];
+    state.d = memory[state.sp + 1];
+    state.sp += 2;
+    state.pc += 1;
+}
+// 0xD5: PUSH D
+void Emulator::op_PUSH_D()
+{
+    memory[state.sp - 1] = state.d;
+    memory[state.sp - 2] = state.e;
+    state.sp -= 2;
+    state.pc += 1;
+}
+// 0xE1: POP H
+void Emulator::op_POP_H()
+{
+    state.l = memory[state.sp];
+    state.h = memory[state.sp + 1];
+    state.sp += 2;
+    state.pc += 1;
+}
+// 0xE3: XTHL
+void Emulator::op_XTHL()
+{
+    std::swap(state.l, memory[state.sp]);
+    std::swap(state.h, memory[state.sp + 1]);
+    state.pc += 1;
+}
+// 0xE5: PUSH H
+void Emulator::op_PUSH_H()
+{
+    memory[state.sp - 1] = state.h;
+    memory[state.sp - 2] = state.l;
+    state.sp -= 2;
+    state.pc += 1;
+}
+// 0xF1: POP PSW
+void Emulator::op_POP_PSW()
+{
+    uint8_t psw = memory[state.sp];
+    state.flags.cy = (psw & 0x01) != 0;
+    state.flags.p = (psw & 0x04) != 0;
+    state.flags.ac = (psw & 0x10) != 0;
+    state.flags.z = (psw & 0x40) != 0;
+    state.flags.s = (psw & 0x80) != 0;
+    state.a = memory[state.sp + 1];
+    state.sp += 2;
+    state.pc += 1;
+}
+// 0xF5: PUSH PSW
+void Emulator::op_PUSH_PSW()
+{
+    memory[state.sp - 1] = state.a;
+    uint8_t psw = (state.flags.s << 7) | (state.flags.z << 6) | (state.flags.ac << 4) | (state.flags.p << 2) | (state.flags.cy << 0) | 0x02;
+    memory[state.sp - 2] = psw;
+    state.sp -= 2;
+    state.pc += 1;
+}
+// 0xFB: EI
+void Emulator::op_EI()
+{
+    state.interrupts_enabled = true;
+    state.pc += 1;
+}
+
 void Emulator::requestInterrupt(uint8_t interrupt_num)
 {
-    // TODO: Implement interrupt handling
+    if (state.interrupts_enabled)
+    {
+        // Push PC onto stack
+        memory[state.sp - 1] = (state.pc >> 8) & 0xFF;
+        memory[state.sp - 2] = state.pc & 0xFF;
+        state.sp -= 2;
+
+        // Jump to interrupt service routine
+        state.pc = 8 * interrupt_num;
+
+        // Disable interrupts
+        state.interrupts_enabled = false;
+    }
 }
+
 
 CPUState Emulator::getCPUState() const
 {
