@@ -1038,10 +1038,39 @@ uint16_t Emulator::hl() const
 
 uint8_t Emulator::io_read(uint8_t port)
 {
-    // TODO: Implement handling for system input
+    switch (port)
+    {
+        case 0:  // IN0: coin and start buttons
+            return state.port_in_0;
+        case 1:  // IN1: player 1 controls
+            return state.port_in_1;
+        case 2:  // IN2: player 2 controls
+            return state.port_in_2;
+        case 3:  // IN3: shift register result
+            return (state.shift_register >> (8 - state.shift_offset)) & 0xFF;
+        default:
+            return 0;
+    }
 }
 
 uint8_t Emulator::io_write(uint8_t port, uint8_t val)
 {
-    // TODO: Implement handling for system output
+    switch (port)
+    {
+        case 2:  // OUT2: shift register offset
+            state.shift_offset = val & 0x07;  // only lower 3 bits used
+            break;
+        case 4:  // OUT4: shift register data
+            state.shift_register = (state.shift_register >> 8) | (val << 8);
+            break;
+        case 3:  // OUT3: sound control (not fully implemented here)
+            std::cout << "Sound control (OUT 3) write: " << std::hex << (int)val << "\n";
+            break;
+        case 5:  // OUT5: sound control 2
+            std::cout << "Sound control (OUT 5) write: " << std::hex << (int)val << "\n";
+            break;
+        default:
+            std::cout << "Unknown OUT port " << std::hex << (int)port << ": " << (int)val << "\n";
+            break;
+    }
 }

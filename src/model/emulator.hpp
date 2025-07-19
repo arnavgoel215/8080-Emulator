@@ -41,6 +41,14 @@ struct CPUState
     } flags;
 
     bool interrupts_enabled;
+
+    // I/O ports
+    uint8_t port_in_0 = 0;
+    uint8_t port_in_1 = 0;
+    uint8_t port_in_2 = 0;
+
+    uint16_t shift_register = 0;
+    uint8_t shift_offset = 0;
 };
 
 /**
