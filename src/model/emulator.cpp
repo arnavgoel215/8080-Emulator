@@ -97,6 +97,22 @@ void Emulator::executeInstruction()
         case 0x95: op_SUB(state.h); break;  // SUB L
         case 0x96: op_SUB(memory[hl()]); break;  // SUB M
         case 0x97: op_SUB(state.a); break;  // SUB A
+        case 0x98: op_SBB(state.b); break;  // SBB B
+        case 0x99: op_SBB(state.c); break;  // SBB C
+        case 0x9A: op_SBB(state.d); break;  // SBB D
+        case 0x9B: op_SBB(state.e); break;  // SBB E
+        case 0x9C: op_SBB(state.h); break;  // SBB H
+        case 0x9D: op_SBB(state.l); break;  // SBB L
+        case 0x9E: op_SBB(memory[hl()]); break;  // SBB M
+        case 0x9F: op_SBB(state.a); break;  // SBB A
+        case 0xA0: op_ANA(state.b); break;  // ANA B
+        case 0xA1: op_ANA(state.c); break;  // ANA C
+        case 0xA2: op_ANA(state.d); break;  // ANA D
+        case 0xA3: op_ANA(state.e); break;  // ANA E
+        case 0xA4: op_ANA(state.h); break;  // ANA H
+        case 0xA5: op_ANA(state.l); break;  // ANA L
+        case 0xA6: op_ANA(memory[hl()]); break;  // ANA M
+        case 0xA7: op_ANA(state.a); break;  // ANA A
 
         default:
             std::cerr << "Error: Unimplemented opcode " 
@@ -187,4 +203,31 @@ void Emulator::op_SUB(uint8_t val)
     *a = result & 0xFF;  // Ensures that new value fits within 8-bits
 
     setFlags(*a);
+}
+
+//  0x98 to 0x9F SBB
+void Emulator::op_SBB(uint8_t val)
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary carry flag
+
+    uint16_t borrow = *cy ? 1 : 0;  // Sets the borrow value based on status of the carry flag
+    uint16_t result = *a - val - borrow;
+
+    *cy = (*a < (val + borrow));
+    *ac = ((*a & 0x0F) < ((val & 0x0F) + borrow));
+
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+    setFlags(*a);
+}
+
+// 0xA0 to 0xA7 ANA
+void Emulator::op_ANA(uint8_t val)
+{
+    state.a = state.a & val;
+    state.flags.cy = 0;
+    state.flags.ac = 1;  // AC flag is always set to 1 during ANA instruction
+    setFlags(state.a);
 }

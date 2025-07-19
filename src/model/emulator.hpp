@@ -113,12 +113,7 @@ private:
      */
     void executeInstruction();
 
-    /**
-     * @brief Executes the ADD instruction
-     */
-    void op_ADD(uint8_t val);
-
-    /**
+        /**
      * @brief Sets flags based on result of executing instruction
      */
     void setFlags(uint8_t result);
@@ -128,15 +123,19 @@ private:
      */
     uint16_t hl() const;
 
-    /**
-     * @brief Executes the ADC instruction
-     */
-    void op_ADC(uint8_t val);
+    // --- Opcode Functions ---
 
-    /**
-     * @brief Executes the SUB instruction
-     */
+    // Arithmatic Group
+    /** @brief Executes the ADD instruction*/
+    void op_ADD(uint8_t val);
+     /** @brief Executes the ADC instruction */
+    void op_ADC(uint8_t val);
+    /** @brief Executes the SUB instruction */
     void op_SUB(uint8_t val);
+    /** @brief Executes the SBB instruction*/
+    void op_SBB(uint8_t val);
+    /** @brief Executes the ANA instruction (AND accumulator) */
+    void op_ANA(uint8_t val);
 };
 
 #endif /* EMULATOR_HPP_ */
