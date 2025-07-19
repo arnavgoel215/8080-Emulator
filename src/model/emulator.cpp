@@ -194,6 +194,48 @@ void Emulator::executeInstruction()
         case 0xB5: op_ORA(state.l); break;  // ORA L
         case 0xB6: op_ORA(memory[hl()]); break;  // ORA M
         case 0xB7: op_ORA(state.a); break;  // ORA A
+        case 0xB8: op_CMP(state.b); break;  // CMP B
+        case 0xB9: op_CMP(state.c); break;  // CMP C
+        case 0xBA: op_CMP(state.d); break;  // CMP D
+        case 0xBB: op_CMP(state.e); break;  // CMP E
+        case 0xBC: op_CMP(state.h); break;  // CMP H
+        case 0xBD: op_CMP(state.l); break;  // CMP L
+        case 0xBE: op_CMP(memory[hl()]); break;  // CMP M
+        case 0xBF: op_CMP(state.a); break;  // CMP A
+        case 0xC0: op_RET_cond(!state.flags.z); break;  // RNZ
+        case 0xC2: op_JMP_cond(!state.flags.z); break;  // JNZ addr
+        case 0xC4: op_CALL_cond(!state.flags.z); break;  // CNZ addr
+        case 0xC6: op_ADD(memory[state.pc++]); break;  // ADI d8
+        case 0xC8: op_RET_cond(state.flags.z); break;  // RZ
+        case 0xCA: op_JMP_cond(state.flags.z); break;  // JZ addr
+        case 0xCC: op_CALL_cond(state.flags.z); break; // CZ addr
+        case 0xCE: op_ADD(memory[state.pc++]); break;  // ACI d8
+        case 0xD0: op_RET_cond(!state.flags.cy); break;  // RNC
+        case 0xD2: op_JMP_cond(!state.flags.cy); break;  // JNC addr
+        case 0xD4: op_CALL_cond(!state.flags.cy); break;  // CNC addr
+        case 0xD6: op_SUB(memory[state.pc++]); break;  // SUI d8
+        case 0xD8: op_RET_cond(state.flags.cy); break;  // RC
+        case 0xDA: op_RET_cond(state.flags.cy); break;  // JC addr
+        case 0xDC: op_CALL_cond(state.flags.cy); break;  // CC addr
+        case 0xDE: op_SBB(memory[state.pc++]); break;  // SBI d8
+        case 0xE0: op_RET_cond(!state.flags.p); break;  // RPO
+        case 0xE2: op_JMP_cond(!state.flags.p); break;  // JPO addr
+        case 0xE4: op_CALL_cond(!state.flags.p); break;  // CPO addr
+        case 0xE6: op_ANA(memory[state.pc++]); break;  // ANI d8
+        case 0xE8: op_RET_cond(state.flags.p); break;  // RPE
+        case 0xEA: op_JMP_cond(state.flags.p); break;  // JPE addr
+        case 0xEC: op_CALL_cond(state.flags.p); break;  // CPE addr
+        case 0xEE: op_XRA(memory[state.pc++]); break;  // XRI d8
+        case 0xF0: op_RET_cond(!state.flags.s); break;  // RP
+        case 0xF2: op_JMP_cond(!state.flags.s); break;  // JP addr
+        case 0xF4: op_CALL_cond(!state.flags.s); break;  // CP addr
+        case 0xF6: op_ORA(memory[state.pc++]); break;  // ORI d8
+        case 0xF8: op_RET_cond(state.flags.s); break;  // RM
+        case 0xFA: op_JMP_cond(state.flags.s); break;  // JM addr
+        case 0xFC: op_CALL_cond(state.flags.s); break;  // CM addr
+        case 0xFE: op_CMP(memory[state.pc++]); break;  // CPI d8
+        case 0xD3: op_OUT(); break;  // OUT d8
+        case 0xDB: op_IN(); break;  // IN d8
 
         default:
             std::cerr << "Error: Unimplemented opcode " 
@@ -206,102 +248,6 @@ void Emulator::executeInstruction()
 }
 
 // --- Opcode Implementations ---
-
-// Arithmetic Group
-// 80 to 87: ADD
-void Emulator::op_ADD(uint8_t val)
-{
-    // Pointers to register A and to flags CY and AC
-    uint8_t *a = &state.a;  // Register A
-    bool *cy = &state.flags.cy;  // Carry flag
-    bool *ac = &state.flags.ac;  // Auxiliary carry flag
-
-    uint16_t result = *a + val;
-    *cy = result > 0xFF;
-    *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
-    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
-
-    setFlags(*a);
-}
-
-// 88 to 8F: ADC
-void Emulator::op_ADC(uint8_t val)
-{
-    // Pointers to register A and to flags CY and AC
-    uint8_t *a = &state.a;  // Register A
-    bool *cy = &state.flags.cy;  // Carry flag
-    bool *ac = &state.flags.ac;  // Auxiliary flag
-
-    uint16_t result = *a + val + (*cy ? 1 : 0);
-    *cy = result > 0xFF;
-    *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
-    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
-
-    setFlags(*a);
-}
-
-// 90 to 97 SUB
-void Emulator::op_SUB(uint8_t val) 
-{
-    // Pointers to register A and to flags CY and AC
-    uint8_t *a = &state.a;  // Register A
-    bool *cy = &state.flags.cy;  // Carry flag
-    bool *ac = &state.flags.ac;  // Auxiliary carry flag
-
-    uint16_t result = *a - val;
-    *cy = (*a < val);
-    *ac = ((*a & 0x0F) < (val & 0x0F));
-    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
-
-    setFlags(*a);
-}
-
-// 98 to 9F SBB
-void Emulator::op_SBB(uint8_t val)
-{
-    // Pointers to register A and to flags CY and AC
-    uint8_t *a = &state.a;  // Register A
-    bool *cy = &state.flags.cy;  // Carry flag
-    bool *ac = &state.flags.ac;  // Auxiliary carry flag
-
-    uint16_t borrow = *cy ? 1 : 0;  // Sets the borrow value based on status of the carry flag
-    uint16_t result = *a - val - borrow;
-
-    *cy = (*a < (val + borrow));
-    *ac = ((*a & 0x0F) < ((val & 0x0F) + borrow));
-
-    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
-    setFlags(*a);
-}
-
-// Logical Group
-// A0 to A7 ANA
-void Emulator::op_ANA(uint8_t val)
-{
-    state.a = state.a & val;  // AND operation
-    state.flags.cy = 0;
-    state.flags.ac = 1;  // AC flag is always set to 1 during ANA instruction
-    setFlags(state.a);
-}
-
-// A8 to AF XRA
-void Emulator::op_XRA(uint8_t val)
-{
-    state.a = state.a ^ val;  // XOR operation
-    state.flags.cy = 0;
-    state.flags.ac = 0;
-    setFlags(state.a);
-}
-
-// B0 to B7 ORA
-void Emulator::op_ORA(uint8_t val)
-{
-    state.a = state.a | val;  // OR operation
-    state.flags.cy = 0;
-    state.flags.ac = 0;
-    setFlags(state.a);
-}
-
 
 // Data Transfer Group
 // 0x01: LXI B,d16
@@ -740,7 +686,68 @@ void Emulator::op_DCR_A()
     state.a = result;
     state.pc += 1;
 }
+// 80 to 87: ADD
+void Emulator::op_ADD(uint8_t val)
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary carry flag
 
+    uint16_t result = *a + val;
+    *cy = result > 0xFF;
+    *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+
+    setFlags(*a);
+}
+// 88 to 8F: ADC
+void Emulator::op_ADC(uint8_t val)
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary flag
+
+    uint16_t result = *a + val + (*cy ? 1 : 0);
+    *cy = result > 0xFF;
+    *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+
+    setFlags(*a);
+}
+// 90 to 97 SUB
+void Emulator::op_SUB(uint8_t val) 
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary carry flag
+
+    uint16_t result = *a - val;
+    *cy = (*a < val);
+    *ac = ((*a & 0x0F) < (val & 0x0F));
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+
+    setFlags(*a);
+}
+// 98 to 9F SBB
+void Emulator::op_SBB(uint8_t val)
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary carry flag
+
+    uint16_t borrow = *cy ? 1 : 0;  // Sets the borrow value based on status of the carry flag
+    uint16_t result = *a - val - borrow;
+
+    *cy = (*a < (val + borrow));
+    *ac = ((*a & 0x0F) < ((val & 0x0F) + borrow));
+
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+    setFlags(*a);
+}
 // Logical Group
 // 0x07: RLC
 void Emulator::op_RLC()
@@ -782,6 +789,43 @@ void Emulator::op_CMC()
     state.flags.cy = !state.flags.cy;
     state.pc += 1;
 }
+// A0 to A7 ANA
+void Emulator::op_ANA(uint8_t val)
+{
+    state.a = state.a & val;  // AND operation
+    state.flags.cy = 0;
+    state.flags.ac = 1;  // AC flag is always set to 1 during ANA instruction
+    setFlags(state.a);
+}
+// A8 to AF XRA
+void Emulator::op_XRA(uint8_t val)
+{
+    state.a = state.a ^ val;  // XOR operation
+    state.flags.cy = 0;
+    state.flags.ac = 0;
+    setFlags(state.a);
+}
+// B0 to B7 ORA
+void Emulator::op_ORA(uint8_t val)
+{
+    state.a = state.a | val;  // OR operation
+    state.flags.cy = 0;
+    state.flags.ac = 0;
+    setFlags(state.a);
+}
+// B8 to B12 CMP
+void Emulator::op_CMP(uint8_t val)
+{
+    uint8_t *a = &state.a;
+    bool *cy = &state.flags.cy;
+    bool *ac = &state.flags.ac;
+
+    uint16_t result = *a - val;
+    *cy = (*a < val);
+    *ac = ((*a & 0x0F) < (val & 0x0F));
+
+    setFlags(result & 0xFF);
+}
 
 // Branch Group
 // 0xC3: JMP addr
@@ -808,6 +852,37 @@ void Emulator::op_CALL()
 void Emulator::op_PCHL()
 {
     state.pc = (state.h << 8) | state.l;
+}
+// Handles return conditionals
+void Emulator::op_RET_cond(bool condition)
+{
+    if (condition) 
+        op_RET();
+}
+// Handles jump conditionals
+void Emulator::op_JMP_cond(bool condition)
+{
+    uint16_t addr = memory[state.pc] | (memory[state.pc + 1] << 8);
+    if (condition)
+        state.pc;
+    else
+        state.pc += 2;
+}
+// Handles call conditionals
+void Emulator::op_CALL_cond(bool condition)
+{
+    uint16_t addr = memory[state.pc] | (memory[state.pc + 1] << 8);
+    if (condition)
+    {
+        state.pc += 2;
+        memory[state.sp--] = (state.pc >> 8) & 0xFF;
+        memory[state.sp--] = state.pc & 0xFF;
+        state.pc = addr;
+    }
+    else
+    {
+        state.pc += 2;
+    }
 }
 
 // Stack, I/O, and Machine Control Group
@@ -902,6 +977,18 @@ void Emulator::op_EI()
     state.interrupts_enabled = true;
     state.pc += 1;
 }
+// 0xDB: IN d8
+void Emulator::op_IN()
+{
+    uint8_t port = memory[state.pc++];
+    io_read(port);
+}
+// 0xD3: OUT d8 
+void Emulator::op_OUT()
+{
+    uint8_t port = memory[state.pc++];
+    state.a = io_write(port, state.a);
+}
 
 void Emulator::requestInterrupt(uint8_t interrupt_num)
 {
@@ -947,4 +1034,14 @@ void Emulator::setFlags(uint8_t result)
 uint16_t Emulator::hl() const
 {
     return (state.h << 8) | state.l;
+}
+
+uint8_t Emulator::io_read(uint8_t port)
+{
+    // TODO: Implement handling for system input
+}
+
+uint8_t Emulator::io_write(uint8_t port, uint8_t val)
+{
+    // TODO: Implement handling for system output
 }

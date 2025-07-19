@@ -123,6 +123,16 @@ private:
      */
     uint16_t hl() const;
 
+    /**
+     * @brief Handles input into the system
+     */
+    uint8_t io_read(uint8_t port);
+
+    /**
+     * @brief Handles output from the system
+     */
+    uint8_t io_write(uint8_t port, uint8_t val);
+
     // --- Opcode Functions ---
 
     // Data Transfer Group
@@ -222,13 +232,13 @@ private:
     void op_INR_A();
     /** @brief 0x3D: Decrement accumulator */
     void op_DCR_A();
-    /** @brief Executes the ADD instruction*/
+    /** @brief Executes the ADD instruction */
     void op_ADD(uint8_t val);
      /** @brief Executes the ADC instruction */
     void op_ADC(uint8_t val);
     /** @brief Executes the SUB instruction */
     void op_SUB(uint8_t val);
-    /** @brief Executes the SBB instruction*/
+    /** @brief Executes the SBB instruction */
     void op_SBB(uint8_t val);
 
     // Logical Group
@@ -250,6 +260,8 @@ private:
     void op_XRA(uint8_t val);
     /** @brief Executes the ORA instruction (OR accumulator) */
     void op_ORA(uint8_t val);
+    /** @brief Executes the CMP instruction (compare accumulator) */
+    void op_CMP(uint8_t val);
 
     // Branch Group
     /** @brief 0xC3: Jump */
@@ -260,6 +272,12 @@ private:
     void op_CALL();
     /** @brief 0xE9: Load program counter from H and L */
     void op_PCHL();
+    /** @brief Executes return conditional instructions */
+    void op_RET_cond(bool condition);
+    /** @brief Executes jump conditional instructions */
+    void op_JMP_cond(bool condition);
+    /** @brief Executes call conditional instructions */
+    void op_CALL_cond(bool condition);
 
     // Stack, I/O, and Machine Control Group
     /** @brief 0x00: No operation */
@@ -286,6 +304,10 @@ private:
     void op_PUSH_PSW();
     /** @brief 0xFB: Enable interrupts */
     void op_EI();
+    /** @brief Handles the input to the system */
+    void op_IN();
+    /** @brief Handles output from the system */
+    void op_OUT();
 };
 
 #endif /* EMULATOR_HPP_ */
