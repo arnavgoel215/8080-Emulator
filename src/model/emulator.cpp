@@ -113,6 +113,22 @@ void Emulator::executeInstruction()
         case 0xA5: op_ANA(state.l); break;  // ANA L
         case 0xA6: op_ANA(memory[hl()]); break;  // ANA M
         case 0xA7: op_ANA(state.a); break;  // ANA A
+        case 0xA8: op_XRA(state.b); break;  // XRA B
+        case 0xA9: op_XRA(state.c); break;  // XRA C
+        case 0xAA: op_XRA(state.d); break;  // XRA D
+        case 0xAB: op_XRA(state.e); break;  // XRA E
+        case 0xAC: op_XRA(state.h); break;  // XRA H
+        case 0xAD: op_XRA(state.l); break;  // XRA L
+        case 0xAE: op_XRA(memory[hl()]); break;  // XRA M
+        case 0xAF: op_XRA(state.a); break;  // XRA A
+        case 0xB0: op_ORA(state.b); break;  // ORA B
+        case 0xB1: op_ORA(state.c); break;  // ORA C
+        case 0xB2: op_ORA(state.d); break;  // ORA D
+        case 0xB3: op_ORA(state.e); break;  // ORA E
+        case 0xB4: op_ORA(state.h); break;  // ORA H
+        case 0xB5: op_ORA(state.l); break;  // ORA L
+        case 0xB6: op_ORA(memory[hl()]); break;  // ORA M
+        case 0xB7: op_ORA(state.a); break;  // ORA A
 
         default:
             std::cerr << "Error: Unimplemented opcode " 
@@ -157,7 +173,7 @@ uint16_t Emulator::hl() const
     return (state.h << 8) | state.l;
 }
 
-// 0x80 to 0x87: ADD
+// 80 to 87: ADD
 void Emulator::op_ADD(uint8_t val)
 {
     // Pointers to register A and to flags CY and AC
@@ -173,7 +189,7 @@ void Emulator::op_ADD(uint8_t val)
     setFlags(*a);
 }
 
-// 0x88 to 0x8F: ADC
+// 88 to 8F: ADC
 void Emulator::op_ADC(uint8_t val)
 {
     // Pointers to register A and to flags CY and AC
@@ -189,7 +205,7 @@ void Emulator::op_ADC(uint8_t val)
     setFlags(*a);
 }
 
-// 0x90 to 0x97 SUB
+// 90 to 97 SUB
 void Emulator::op_SUB(uint8_t val) 
 {
     // Pointers to register A and to flags CY and AC
@@ -205,7 +221,7 @@ void Emulator::op_SUB(uint8_t val)
     setFlags(*a);
 }
 
-//  0x98 to 0x9F SBB
+//  98 to 9F SBB
 void Emulator::op_SBB(uint8_t val)
 {
     // Pointers to register A and to flags CY and AC
@@ -223,11 +239,29 @@ void Emulator::op_SBB(uint8_t val)
     setFlags(*a);
 }
 
-// 0xA0 to 0xA7 ANA
+// A0 to A7 ANA
 void Emulator::op_ANA(uint8_t val)
 {
-    state.a = state.a & val;
+    state.a = state.a & val;  // AND operation
     state.flags.cy = 0;
     state.flags.ac = 1;  // AC flag is always set to 1 during ANA instruction
+    setFlags(state.a);
+}
+
+// A8 to AF XRA
+void Emulator::op_XRA(uint8_t val)
+{
+    state.a = state.a ^ val;  // XOR operation
+    state.flags.cy = 0;
+    state.flags.ac = 0;
+    setFlags(state.a);
+}
+
+// B0 to B7 ORA
+void Emulator::op_ORA(uint8_t val)
+{
+    state.a = state.a | val;  // OR operation
+    state.flags.cy = 0;
+    state.flags.ac = 0;
     setFlags(state.a);
 }

@@ -125,7 +125,7 @@ private:
 
     // --- Opcode Functions ---
 
-    // Arithmatic Group
+    // Arithmetic Group
     /** @brief Executes the ADD instruction*/
     void op_ADD(uint8_t val);
      /** @brief Executes the ADC instruction */
@@ -134,8 +134,14 @@ private:
     void op_SUB(uint8_t val);
     /** @brief Executes the SBB instruction*/
     void op_SBB(uint8_t val);
+
+    // Logical Group
     /** @brief Executes the ANA instruction (AND accumulator) */
     void op_ANA(uint8_t val);
+    /** @brief Executes the XRA Instruction (XOR accumulator) */
+    void op_XRA(uint8_t val);
+    /** @brief Executes the ORA instruction (OR accumulator) */
+    void op_ORA(uint8_t val);
 };
 
 #endif /* EMULATOR_HPP_ */
