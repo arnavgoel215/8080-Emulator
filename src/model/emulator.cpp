@@ -140,39 +140,9 @@ void Emulator::executeInstruction()
     }
 }
 
-void Emulator::requestInterrupt(uint8_t interrupt_num)
-{
-    // TODO: Implement interrupt handling
-}
+// --- Opcode Implementations ---
 
-CPUState Emulator::getCPUState() const
-{
-    return state;
-}
-
-const uint8_t* Emulator::getFrameBuffer() const
-{
-    // The framebuffer for Space Invaders starts at 0x2400
-    if (memory.size() >= 0x2400 + VRAM_SIZE)
-    {
-        return &memory[0x2400];
-    }
-    return nullptr;
-}
-
-void Emulator::setFlags(uint8_t result)
-{
-    // Flags Z, S and P get set based on final result of operation
-    state.flags.z = (result == 0);
-    state.flags.s = (result & 0x80);
-    state.flags.p = __builtin_parity(result);
-}
-
-uint16_t Emulator::hl() const
-{
-    return (state.h << 8) | state.l;
-}
-
+// Arithmetic Group
 // 80 to 87: ADD
 void Emulator::op_ADD(uint8_t val)
 {
@@ -221,7 +191,7 @@ void Emulator::op_SUB(uint8_t val)
     setFlags(*a);
 }
 
-//  98 to 9F SBB
+// 98 to 9F SBB
 void Emulator::op_SBB(uint8_t val)
 {
     // Pointers to register A and to flags CY and AC
@@ -239,6 +209,7 @@ void Emulator::op_SBB(uint8_t val)
     setFlags(*a);
 }
 
+// Logical Group
 // A0 to A7 ANA
 void Emulator::op_ANA(uint8_t val)
 {
@@ -264,4 +235,38 @@ void Emulator::op_ORA(uint8_t val)
     state.flags.cy = 0;
     state.flags.ac = 0;
     setFlags(state.a);
+}
+
+
+void Emulator::requestInterrupt(uint8_t interrupt_num)
+{
+    // TODO: Implement interrupt handling
+}
+
+CPUState Emulator::getCPUState() const
+{
+    return state;
+}
+
+const uint8_t* Emulator::getFrameBuffer() const
+{
+    // The framebuffer for Space Invaders starts at 0x2400
+    if (memory.size() >= 0x2400 + VRAM_SIZE)
+    {
+        return &memory[0x2400];
+    }
+    return nullptr;
+}
+
+void Emulator::setFlags(uint8_t result)
+{
+    // Flags Z, S and P get set based on final result of operation
+    state.flags.z = (result == 0);
+    state.flags.s = (result & 0x80);
+    state.flags.p = __builtin_parity(result);
+}
+
+uint16_t Emulator::hl() const
+{
+    return (state.h << 8) | state.l;
 }
