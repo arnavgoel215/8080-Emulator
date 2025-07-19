@@ -3,7 +3,7 @@
  * 
  * @brief Implementation of the 8080 emulator core.
  * 
- * @author: Jesse
+ * @author: Jesse, Arnav
  * 
  *********************************************************/
 
@@ -138,6 +138,104 @@ void Emulator::executeInstruction()
         case 0xf1: op_POP_PSW(); break;
         case 0xf5: op_PUSH_PSW(); break;
         case 0xfb: op_EI(); break;
+        case 0x80: op_ADD(state.b); break;  // ADD B
+        case 0x81: op_ADD(state.c); break;  // ADD C
+        case 0x82: op_ADD(state.d); break;  // ADD D
+        case 0x83: op_ADD(state.e); break;  // ADD E
+        case 0x84: op_ADD(state.h); break;  // ADD H
+        case 0x85: op_ADD(state.l); break;  // ADD L
+        case 0x86: op_ADD(memory[hl()]); break;  // ADD M
+        case 0x87: op_ADD(state.a); break;  // ADD A
+        case 0x88: op_ADC(state.b); break;  // ADC B
+        case 0x89: op_ADC(state.c); break;  // ADC C
+        case 0x8A: op_ADC(state.d); break;  // ADC D
+        case 0x8B: op_ADC(state.e); break;  // ADC E
+        case 0x8C: op_ADC(state.h); break;  // ADC H
+        case 0x8D: op_ADC(state.l); break;  // ADC L
+        case 0x8E: op_ADC(memory[hl()]); break;  // ADC M
+        case 0x8F: op_ADC(state.a); break;  // ADC A
+        case 0x90: op_SUB(state.b); break;  // SUB B
+        case 0x91: op_SUB(state.c); break;  // SUB C
+        case 0x92: op_SUB(state.d); break;  // SUB D
+        case 0x93: op_SUB(state.e); break;  // SUB E
+        case 0x94: op_SUB(state.h); break;  // SUB H
+        case 0x95: op_SUB(state.h); break;  // SUB L
+        case 0x96: op_SUB(memory[hl()]); break;  // SUB M
+        case 0x97: op_SUB(state.a); break;  // SUB A
+        case 0x98: op_SBB(state.b); break;  // SBB B
+        case 0x99: op_SBB(state.c); break;  // SBB C
+        case 0x9A: op_SBB(state.d); break;  // SBB D
+        case 0x9B: op_SBB(state.e); break;  // SBB E
+        case 0x9C: op_SBB(state.h); break;  // SBB H
+        case 0x9D: op_SBB(state.l); break;  // SBB L
+        case 0x9E: op_SBB(memory[hl()]); break;  // SBB M
+        case 0x9F: op_SBB(state.a); break;  // SBB A
+        case 0xA0: op_ANA(state.b); break;  // ANA B
+        case 0xA1: op_ANA(state.c); break;  // ANA C
+        case 0xA2: op_ANA(state.d); break;  // ANA D
+        case 0xA3: op_ANA(state.e); break;  // ANA E
+        case 0xA4: op_ANA(state.h); break;  // ANA H
+        case 0xA5: op_ANA(state.l); break;  // ANA L
+        case 0xA6: op_ANA(memory[hl()]); break;  // ANA M
+        case 0xA7: op_ANA(state.a); break;  // ANA A
+        case 0xA8: op_XRA(state.b); break;  // XRA B
+        case 0xA9: op_XRA(state.c); break;  // XRA C
+        case 0xAA: op_XRA(state.d); break;  // XRA D
+        case 0xAB: op_XRA(state.e); break;  // XRA E
+        case 0xAC: op_XRA(state.h); break;  // XRA H
+        case 0xAD: op_XRA(state.l); break;  // XRA L
+        case 0xAE: op_XRA(memory[hl()]); break;  // XRA M
+        case 0xAF: op_XRA(state.a); break;  // XRA A
+        case 0xB0: op_ORA(state.b); break;  // ORA B
+        case 0xB1: op_ORA(state.c); break;  // ORA C
+        case 0xB2: op_ORA(state.d); break;  // ORA D
+        case 0xB3: op_ORA(state.e); break;  // ORA E
+        case 0xB4: op_ORA(state.h); break;  // ORA H
+        case 0xB5: op_ORA(state.l); break;  // ORA L
+        case 0xB6: op_ORA(memory[hl()]); break;  // ORA M
+        case 0xB7: op_ORA(state.a); break;  // ORA A
+        case 0xB8: op_CMP(state.b); break;  // CMP B
+        case 0xB9: op_CMP(state.c); break;  // CMP C
+        case 0xBA: op_CMP(state.d); break;  // CMP D
+        case 0xBB: op_CMP(state.e); break;  // CMP E
+        case 0xBC: op_CMP(state.h); break;  // CMP H
+        case 0xBD: op_CMP(state.l); break;  // CMP L
+        case 0xBE: op_CMP(memory[hl()]); break;  // CMP M
+        case 0xBF: op_CMP(state.a); break;  // CMP A
+        case 0xC0: op_RET_cond(!state.flags.z); break;  // RNZ
+        case 0xC2: op_JMP_cond(!state.flags.z); break;  // JNZ addr
+        case 0xC4: op_CALL_cond(!state.flags.z); break;  // CNZ addr
+        case 0xC6: op_ADD(memory[state.pc++]); break;  // ADI d8
+        case 0xC8: op_RET_cond(state.flags.z); break;  // RZ
+        case 0xCA: op_JMP_cond(state.flags.z); break;  // JZ addr
+        case 0xCC: op_CALL_cond(state.flags.z); break; // CZ addr
+        case 0xCE: op_ADD(memory[state.pc++]); break;  // ACI d8
+        case 0xD0: op_RET_cond(!state.flags.cy); break;  // RNC
+        case 0xD2: op_JMP_cond(!state.flags.cy); break;  // JNC addr
+        case 0xD4: op_CALL_cond(!state.flags.cy); break;  // CNC addr
+        case 0xD6: op_SUB(memory[state.pc++]); break;  // SUI d8
+        case 0xD8: op_RET_cond(state.flags.cy); break;  // RC
+        case 0xDA: op_RET_cond(state.flags.cy); break;  // JC addr
+        case 0xDC: op_CALL_cond(state.flags.cy); break;  // CC addr
+        case 0xDE: op_SBB(memory[state.pc++]); break;  // SBI d8
+        case 0xE0: op_RET_cond(!state.flags.p); break;  // RPO
+        case 0xE2: op_JMP_cond(!state.flags.p); break;  // JPO addr
+        case 0xE4: op_CALL_cond(!state.flags.p); break;  // CPO addr
+        case 0xE6: op_ANA(memory[state.pc++]); break;  // ANI d8
+        case 0xE8: op_RET_cond(state.flags.p); break;  // RPE
+        case 0xEA: op_JMP_cond(state.flags.p); break;  // JPE addr
+        case 0xEC: op_CALL_cond(state.flags.p); break;  // CPE addr
+        case 0xEE: op_XRA(memory[state.pc++]); break;  // XRI d8
+        case 0xF0: op_RET_cond(!state.flags.s); break;  // RP
+        case 0xF2: op_JMP_cond(!state.flags.s); break;  // JP addr
+        case 0xF4: op_CALL_cond(!state.flags.s); break;  // CP addr
+        case 0xF6: op_ORA(memory[state.pc++]); break;  // ORI d8
+        case 0xF8: op_RET_cond(state.flags.s); break;  // RM
+        case 0xFA: op_JMP_cond(state.flags.s); break;  // JM addr
+        case 0xFC: op_CALL_cond(state.flags.s); break;  // CM addr
+        case 0xFE: op_CMP(memory[state.pc++]); break;  // CPI d8
+        case 0xD3: op_OUT(); break;  // OUT d8
+        case 0xDB: op_IN(); break;  // IN d8
 
         default:
             std::cerr << "Error: Unimplemented opcode " 
@@ -588,7 +686,68 @@ void Emulator::op_DCR_A()
     state.a = result;
     state.pc += 1;
 }
+// 80 to 87: ADD
+void Emulator::op_ADD(uint8_t val)
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary carry flag
 
+    uint16_t result = *a + val;
+    *cy = result > 0xFF;
+    *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+
+    setFlags(*a);
+}
+// 88 to 8F: ADC
+void Emulator::op_ADC(uint8_t val)
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary flag
+
+    uint16_t result = *a + val + (*cy ? 1 : 0);
+    *cy = result > 0xFF;
+    *ac = ((*a & 0x0F) + (val & 0x0F) + (*cy ? 1 : 0)) > 0x0F;
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+
+    setFlags(*a);
+}
+// 90 to 97 SUB
+void Emulator::op_SUB(uint8_t val) 
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary carry flag
+
+    uint16_t result = *a - val;
+    *cy = (*a < val);
+    *ac = ((*a & 0x0F) < (val & 0x0F));
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+
+    setFlags(*a);
+}
+// 98 to 9F SBB
+void Emulator::op_SBB(uint8_t val)
+{
+    // Pointers to register A and to flags CY and AC
+    uint8_t *a = &state.a;  // Register A
+    bool *cy = &state.flags.cy;  // Carry flag
+    bool *ac = &state.flags.ac;  // Auxiliary carry flag
+
+    uint16_t borrow = *cy ? 1 : 0;  // Sets the borrow value based on status of the carry flag
+    uint16_t result = *a - val - borrow;
+
+    *cy = (*a < (val + borrow));
+    *ac = ((*a & 0x0F) < ((val & 0x0F) + borrow));
+
+    *a = result & 0xFF;  // Ensures that new value fits within 8-bits
+    setFlags(*a);
+}
 // Logical Group
 // 0x07: RLC
 void Emulator::op_RLC()
@@ -630,6 +789,43 @@ void Emulator::op_CMC()
     state.flags.cy = !state.flags.cy;
     state.pc += 1;
 }
+// A0 to A7 ANA
+void Emulator::op_ANA(uint8_t val)
+{
+    state.a = state.a & val;  // AND operation
+    state.flags.cy = 0;
+    state.flags.ac = 1;  // AC flag is always set to 1 during ANA instruction
+    setFlags(state.a);
+}
+// A8 to AF XRA
+void Emulator::op_XRA(uint8_t val)
+{
+    state.a = state.a ^ val;  // XOR operation
+    state.flags.cy = 0;
+    state.flags.ac = 0;
+    setFlags(state.a);
+}
+// B0 to B7 ORA
+void Emulator::op_ORA(uint8_t val)
+{
+    state.a = state.a | val;  // OR operation
+    state.flags.cy = 0;
+    state.flags.ac = 0;
+    setFlags(state.a);
+}
+// B8 to B12 CMP
+void Emulator::op_CMP(uint8_t val)
+{
+    uint8_t *a = &state.a;
+    bool *cy = &state.flags.cy;
+    bool *ac = &state.flags.ac;
+
+    uint16_t result = *a - val;
+    *cy = (*a < val);
+    *ac = ((*a & 0x0F) < (val & 0x0F));
+
+    setFlags(result & 0xFF);
+}
 
 // Branch Group
 // 0xC3: JMP addr
@@ -656,6 +852,37 @@ void Emulator::op_CALL()
 void Emulator::op_PCHL()
 {
     state.pc = (state.h << 8) | state.l;
+}
+// Handles return conditionals
+void Emulator::op_RET_cond(bool condition)
+{
+    if (condition) 
+        op_RET();
+}
+// Handles jump conditionals
+void Emulator::op_JMP_cond(bool condition)
+{
+    uint16_t addr = memory[state.pc] | (memory[state.pc + 1] << 8);
+    if (condition)
+        state.pc;
+    else
+        state.pc += 2;
+}
+// Handles call conditionals
+void Emulator::op_CALL_cond(bool condition)
+{
+    uint16_t addr = memory[state.pc] | (memory[state.pc + 1] << 8);
+    if (condition)
+    {
+        state.pc += 2;
+        memory[state.sp--] = (state.pc >> 8) & 0xFF;
+        memory[state.sp--] = state.pc & 0xFF;
+        state.pc = addr;
+    }
+    else
+    {
+        state.pc += 2;
+    }
 }
 
 // Stack, I/O, and Machine Control Group
@@ -750,6 +977,18 @@ void Emulator::op_EI()
     state.interrupts_enabled = true;
     state.pc += 1;
 }
+// 0xDB: IN d8
+void Emulator::op_IN()
+{
+    uint8_t port = memory[state.pc++];
+    io_read(port);
+}
+// 0xD3: OUT d8 
+void Emulator::op_OUT()
+{
+    uint8_t port = memory[state.pc++];
+    state.a = io_write(port, state.a);
+}
 
 void Emulator::requestInterrupt(uint8_t interrupt_num)
 {
@@ -782,4 +1021,56 @@ const uint8_t* Emulator::getFrameBuffer() const
         return &memory[0x2400];
     }
     return nullptr;
+}
+
+void Emulator::setFlags(uint8_t result)
+{
+    // Flags Z, S and P get set based on final result of operation
+    state.flags.z = (result == 0);
+    state.flags.s = (result & 0x80);
+    state.flags.p = __builtin_parity(result);
+}
+
+uint16_t Emulator::hl() const
+{
+    return (state.h << 8) | state.l;
+}
+
+uint8_t Emulator::io_read(uint8_t port)
+{
+    switch (port)
+    {
+        case 0:  // IN0: coin and start buttons
+            return state.port_in_0;
+        case 1:  // IN1: player 1 controls
+            return state.port_in_1;
+        case 2:  // IN2: player 2 controls
+            return state.port_in_2;
+        case 3:  // IN3: shift register result
+            return (state.shift_register >> (8 - state.shift_offset)) & 0xFF;
+        default:
+            return 0;
+    }
+}
+
+uint8_t Emulator::io_write(uint8_t port, uint8_t val)
+{
+    switch (port)
+    {
+        case 2:  // OUT2: shift register offset
+            state.shift_offset = val & 0x07;  // only lower 3 bits used
+            break;
+        case 4:  // OUT4: shift register data
+            state.shift_register = (state.shift_register >> 8) | (val << 8);
+            break;
+        case 3:  // OUT3: sound control (not fully implemented here)
+            std::cout << "Sound control (OUT 3) write: " << std::hex << (int)val << "\n";
+            break;
+        case 5:  // OUT5: sound control 2
+            std::cout << "Sound control (OUT 5) write: " << std::hex << (int)val << "\n";
+            break;
+        default:
+            std::cout << "Unknown OUT port " << std::hex << (int)port << ": " << (int)val << "\n";
+            break;
+    }
 }

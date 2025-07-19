@@ -147,6 +147,63 @@
                 "ignoreFailures": true
             }
         ]
-    }
+    },
+    {
+        "name": "macOS - Debug Controller",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/out/controller_main",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${fileDirname}",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "lldb",
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for lldb",
+                "text": "settings set target.pretty-printing true",
+                "ignoreFailures": true
+            }
+        ]
+},
+{
+        "name": "macOS - Debug Disassembler",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/out/disassembler_main",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${fileDirname}",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "lldb",
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for lldb",
+                "text": "settings set target.pretty-printing true",
+                "ignoreFailures": true
+            }
+        ]
+},
+{
+        "name": "macOS - Debug Emulator",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/out/emulator_main",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${fileDirname}",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "lldb",
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for lldb",
+                "text": "settings set target.pretty-printing true",
+                "ignoreFailures": true
+            }
+        ]
+}
     ]
 }
