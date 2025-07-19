@@ -125,25 +125,6 @@ private:
 
     // --- Opcode Functions ---
 
-    // Arithmetic Group
-    /** @brief Executes the ADD instruction*/
-    void op_ADD(uint8_t val);
-     /** @brief Executes the ADC instruction */
-    void op_ADC(uint8_t val);
-    /** @brief Executes the SUB instruction */
-    void op_SUB(uint8_t val);
-    /** @brief Executes the SBB instruction*/
-    void op_SBB(uint8_t val);
-
-    // Logical Group
-    /** @brief Executes the ANA instruction (AND accumulator) */
-    void op_ANA(uint8_t val);
-    /** @brief Executes the XRA Instruction (XOR accumulator) */
-    void op_XRA(uint8_t val);
-    /** @brief Executes the ORA instruction (OR accumulator) */
-    void op_ORA(uint8_t val);
-    // --- Opcode Functions ---
-
     // Data Transfer Group
     /** @brief 0x01: Load Immediate into register pair B and C */
     void op_LXI_B(); 
@@ -241,6 +222,14 @@ private:
     void op_INR_A();
     /** @brief 0x3D: Decrement accumulator */
     void op_DCR_A();
+    /** @brief Executes the ADD instruction*/
+    void op_ADD(uint8_t val);
+     /** @brief Executes the ADC instruction */
+    void op_ADC(uint8_t val);
+    /** @brief Executes the SUB instruction */
+    void op_SUB(uint8_t val);
+    /** @brief Executes the SBB instruction*/
+    void op_SBB(uint8_t val);
 
     // Logical Group
     /** @brief 0x07: Rotate accumulator left */
@@ -255,6 +244,12 @@ private:
     void op_STC();
     /** @brief 0x3F: Complement carry */
     void op_CMC();
+    /** @brief Executes the ANA instruction (AND accumulator) */
+    void op_ANA(uint8_t val);
+    /** @brief Executes the XRA Instruction (XOR accumulator) */
+    void op_XRA(uint8_t val);
+    /** @brief Executes the ORA instruction (OR accumulator) */
+    void op_ORA(uint8_t val);
 
     // Branch Group
     /** @brief 0xC3: Jump */
