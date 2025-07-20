@@ -1,3 +1,20 @@
+// ============================================================
+// Memory Module for the Intel 8080 
+// ------------------------------------------------------------
+//
+// Emulates the memory of the Intel 8080
+// Creates 64KB of emulated RAM divide into 4 sections:
+// ROM: 0x0000 – 0x1FFF | (READ ONLY - Write Protected)
+// Working RAM: 0x2000 – 0x23FF | CPU Functions
+// Video RAM: 0x2400 – 0x3FFF | Video RAM for QT
+// Expansion / Stack:0x4000 – 0xFFFF | Emulation Core and I/O
+//
+//Provides memory access for: RAM/ROM access, VRAM, Debugging
+// Author: Fredo | Date: 7/19/25
+// ============================================================
+
+
+// ================= Include Files ===========================
 #include "memory.hpp"
 #include <iostream>
 #include <fstream>
@@ -19,7 +36,8 @@ Memory::Memory() {
 
 //================== Core Memory Access ======================
 
-// -------------------- READ ------------------------------
+// =================  READ ===================================
+
 // === READ === Handles Memory read requests
 uint8_t Memory::ReadByte(uint16_t address) const {
 
@@ -35,7 +53,9 @@ uint8_t Memory::ReadByte(uint16_t address) const {
     return mem[address]; // Send memory Bytes 
 }
 
-// ------------------ Write: ROM ONLY  -------------------------
+
+// ================== Write: ROM ONLY  ===============================
+
 // === ROM WRITE: (ONLY FOR ROMLoader) ===  Writes to the ROM section of RAM
 // Bypasses the memory ROM protection
 void Memory::writeRomBytes(uint16_t address, uint8_t value) {
@@ -44,10 +64,10 @@ void Memory::writeRomBytes(uint16_t address, uint8_t value) {
     
     // --- DEBUG MODE --- 
     #ifdef ENABLE_MEMORY_DEBUG
-   /* if (address < 0x2000) {
+    if (address < 0x2000) {
         std::cout << "[ROM byte] " << std::hex << std::setw(4) << std::setfill('0') << address
                 << " = " << std::setw(2) << static_cast<int>(value) << "\n";
-    }*/
+    }
     #endif // --- END DEBUG ---
     } else {
         // Error catching: if ROM writes outside of 0x2000
@@ -57,7 +77,7 @@ void Memory::writeRomBytes(uint16_t address, uint8_t value) {
     }
 }
 
-// ----------------- Write (Normal) --------------------------
+// ====================== Write (Normal) ============================
 
 // === Core Write == Handles Memory normal writing request
 void Memory::WriteByte(uint16_t address, uint8_t value) {
@@ -88,7 +108,7 @@ void Memory::WriteByte(uint16_t address, uint8_t value) {
 }
 
 
-// ----------------- Video RAM Access -------------------------------
+// ==================== Video RAM Access =============================
 
 // VRAM boundaries 
 static constexpr uint16_t VRAM_START = 0x2400;
