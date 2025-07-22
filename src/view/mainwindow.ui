@@ -33,7 +33,7 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen_ROM"/>
+    <addaction name="actionLoad_ROM"/>
    </widget>
    <widget class="QMenu" name="menuGame">
     <property name="title">
@@ -43,12 +43,19 @@
     <addaction name="actionPause_Game"/>
     <addaction name="actionInsert_Coin"/>
    </widget>
+   <widget class="QMenu" name="menuDebug">
+    <property name="title">
+     <string>Debug</string>
+    </property>
+    <addaction name="actionRun_Video_Test"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuGame"/>
+   <addaction name="menuDebug"/>
   </widget>
-  <action name="actionOpen_ROM">
+  <action name="actionLoad_ROM">
    <property name="text">
-    <string>Open ROM</string>
+    <string>Load ROM</string>
    </property>
   </action>
   <action name="action_Re_Start_Game">
@@ -73,6 +80,11 @@
    </property>
    <property name="text">
     <string>Insert Coin</string>
+   </property>
+  </action>
+  <action name="actionRun_Video_Test">
+   <property name="text">
+    <string>Run Video Test</string>
    </property>
   </action>
  </widget>

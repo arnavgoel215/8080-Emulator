@@ -1,6 +1,24 @@
-#include "mainwindow.h"
+/**********************************************************
+ * @file view_main.cpp
+ * 
+ * @brief Sample file to run self contained Qt application GUI.
+ * 
+ * @author: Sergio Chavarria
+ * 
+ *********************************************************/
 
+/***************** Include files. ***********************/
+#include "mainwindow.h"
 #include <QApplication>
+
+
+/***************** Macros and defines. ***********************/
+
+/***************** Namespaces. ***********************/
+
+/***************** Local Classes. ***********************/
+
+/***************** Local Functions. ***********************/
 
 int main(int argc, char *argv[])
 {
@@ -9,3 +27,5 @@ int main(int argc, char *argv[])
     w.show();
     return a.exec();
 }
+
+/***************** Global Class Functions. ***********************/
