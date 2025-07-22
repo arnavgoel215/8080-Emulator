@@ -22,14 +22,14 @@ import numpy as np
 image_path = "space_invaders.png"  # Replace with your image path
 original_image = Image.open(image_path).convert("RGB")
 
-# Resize the image to 244x256
-resized_image = original_image.resize((244, 256))
+# Resize the image to 224x256
+resized_image = original_image.resize((224, 256))
 
 # Convert to numpy array
 image_array = np.array(resized_image)
 
 # Create a mask for pixels where any channel (R, G, or B) is >= 10
-mask = np.any(image_array >= 80, axis=-1)
+mask = np.any(image_array >= 95, axis=-1)
 
 # Initialize the result array with all black pixels
 thresholded_array = np.zeros_like(image_array)
