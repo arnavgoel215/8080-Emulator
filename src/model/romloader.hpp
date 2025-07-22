@@ -30,4 +30,8 @@
 // Returns true on success, false on failure.
 bool LoadSpaceInvadersROM(Memory& memory, const std::string& overrideDirectory = "");
 
+// Loads a single ROM binary file into memory starting at target address specified 
+// Performs memory boundary check and writes to ROM only
+bool LoadROMFile(const std::string& filepath, Memory& memory, uint16_t targetAddr);
+
 #endif // ROMLOADER_HPP
