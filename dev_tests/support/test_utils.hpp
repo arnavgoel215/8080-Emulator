@@ -19,6 +19,7 @@
 // ====================== Include Files ===================================
 #include <iostream>
 #include <string>
+#include <fstream>
 #include <sstream>
 #include <iomanip>
 
@@ -41,7 +42,7 @@ inline const std::string RESET = "";
 // =============================== Printing ================================================
 // Formats and prints test result status
 inline void printTestResult(const std::string& tag, const std::string& description, bool passed) {
-    std::cout << "[" << tag << " Test #" << testCounter++ << "] " << description << ": "
+    std::cout << "[" << tag << " Test #" << std::dec << testCounter++ << "] " << description << ": "
               << (passed ? (GREEN + "[PASS]" + RESET) : (RED + "[FAIL]" + RESET))
               << "\n";
 }
@@ -55,4 +56,13 @@ inline std::string hex(uint16_t value, int width = 4) {
     return oss.str();
 }
 
-#endif // TEST_UTILS_HPP
+// =========================== Binary File Creator =============================
+// Helper for creating binary test files from a byte vector
+inline void createBinaryFile(const std::string& filename, const std::vector<uint8_t>& data) {
+    std::ofstream out(filename, std::ios::binary);
+    out.write(reinterpret_cast<const char*>(data.data()), data.size());
+    out.close();
+}
+
+
+#endif 
