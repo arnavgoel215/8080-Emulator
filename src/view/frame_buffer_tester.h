@@ -128,7 +128,7 @@ private:
      * 
      * The image files are embedded into the application resources.
      */
-    const QString FRAME_DIR {":/images/frames/"};
+    const QString FRAME_DIR {":/resources/"};
 
     /**
      * @brief Local frame samples vector.
