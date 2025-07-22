@@ -1,0 +1,1 @@
+  Framebuffer representation, video memory range, and graphical interpretation logic.
