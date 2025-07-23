@@ -1,0 +1,1 @@
+  Describes the project’s testing structure, test categories (unit, functional, integration), and `test_utils.hpp` usage.

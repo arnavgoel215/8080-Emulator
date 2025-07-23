@@ -1,0 +1,1 @@
+  Describes IN/OUT port behaviors, including shift register emulation and port mapping for input/output.
