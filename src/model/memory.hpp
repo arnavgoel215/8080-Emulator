@@ -9,18 +9,16 @@
 // Video RAM: 0x2400 – 0x3FFF | Video RAM for QT
 // Expansion / Stack:0x4000 – 0xFFFF | Emulation Core and I/O
 //
-//Provides memory access for: RAM/ROM access, VRAM, Debugging
+// Provides memory access for: RAM/ROM access, VRAM, Debugging
 // Author: Fredo | Date: 7/19/25
 // ============================================================
 
 
 // ====================== Define Files ====================================
-
 #ifndef MEMORY_HPP
 #define MEMORY_HPP
 
 // ======================= Include Files ===================================
-
 #include <array>
 #include <cstdint>
 #include <string>
@@ -51,6 +49,7 @@ public:
     uint8_t ReadByte(uint16_t address) const; 
     void WriteByte(uint16_t address, uint8_t value); 
     void writeRomBytes(uint16_t address, uint8_t value); 
+    void Clear();
 
     // === VRAM access ===
     // Copy of VRAM for QT | Direct Read only access to VRAM via pointer
