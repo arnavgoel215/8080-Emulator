@@ -141,6 +141,16 @@ private:
      */
     uint8_t io_write(uint8_t port, uint8_t val);
 
+    /**
+     * @brief Gets value stored in register
+     */
+    uint8_t get_reg(uint8_t code);
+
+    /**
+     * @brief Sets value in register
+     */
+    void set_reg(uint8_t code, uint8_t val);
+
     // --- Opcode Functions ---
 
     // Data Transfer Group
@@ -316,6 +326,8 @@ private:
     void op_IN();
     /** @brief Handles output from the system */
     void op_OUT();
+    /** @brief Executes MOV instruction */
+    void op_MOV(uint8_t opcode);
 };
 
 #endif /* EMULATOR_HPP_ */

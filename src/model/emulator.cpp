@@ -1074,3 +1074,33 @@ uint8_t Emulator::io_write(uint8_t port, uint8_t val)
             break;
     }
 }
+
+uint8_t Emulator::get_reg(uint8_t code)
+{
+    switch (code) {
+        case 0: return state.b;
+        case 1: return state.c;
+        case 2: return state.d;
+        case 3: return state.e;
+        case 4: return state.h;
+        case 5: return state.l;
+        case 6: return memory[hl()];
+        case 7: return state.a;
+        default: return 0;
+    }
+}
+
+void Emulator::set_reg(uint8_t code, uint8_t val)
+{
+    switch (code)
+    {
+        case 0: state.b = val; break;
+        case 1: state.c = val; break;
+        case 2: state.d = val; break;
+        case 3: state.e = val; break;
+        case 4: state.h = val; break;
+        case 5: state.l = val; break;
+        case 6: memory[hl()] = val; break;
+        case 7: state.a = val; break;
+    }
+}
