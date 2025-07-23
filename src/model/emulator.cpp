@@ -67,6 +67,20 @@ void Emulator::executeInstruction()
     uint8_t opcode = memory[state.pc];
     // PC is incremented in the opcode function
 
+    // Checks for MOV opcodes.
+    if ((opcode & 0xC0) == 0x40)
+    {
+        uint8_t dst = (opcode >> 3) & 0x07;  // Determines which register to set
+        uint8_t src = opcode & 0x07;  // Determines which register to get value from
+        if (opcode != 0x76)  // 0x76 is the opcode for HLT and not a MOV opcode
+        {
+            uint8_t val = get_reg(src);
+            set_reg(dst, val);  // MOV operation
+            return;
+        }
+    }
+
+    // Switch statement for rest of the opcodes
     switch (opcode)
     {
         case 0x00: op_NOP(); break;
@@ -1077,7 +1091,8 @@ uint8_t Emulator::io_write(uint8_t port, uint8_t val)
 
 uint8_t Emulator::get_reg(uint8_t code)
 {
-    switch (code) {
+    switch (code) 
+    {
         case 0: return state.b;
         case 1: return state.c;
         case 2: return state.d;
