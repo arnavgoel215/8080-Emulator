@@ -169,6 +169,15 @@ private:
     QImage currentRenderedImage;
 
     /**
+     * @brief Color mask image reference.
+     * 
+     * The arcade machine uses a color mask that's fixed for every
+     * pixel. The monochrome image is then multiplied by the mask
+     * to give colors to the screen.
+     */
+    QImage colorMask;
+
+    /**
      * @brief Internal flag for video testing.
      * 
      * This flag is set when video test mode is active.
