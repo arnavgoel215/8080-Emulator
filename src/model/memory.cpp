@@ -24,15 +24,33 @@
 //Initalize and clear the memory on startup
 Memory::Memory() {
     mem.fill(0x00);  
-// ------ DEBUG MODE ------
+// ---DEBUG MODE ---
 // Initialize debug tracking counters and snapshot
+// Used with the Romloader to Memory Process
 #ifdef ENABLE_MEMORY_DEBUG
     snapshot.clear();
     readCounts.clear();
     writeCounts.clear();
     watchpoints.clear();
-#endif // --- END DEBUG --- 
+    std::cout << "[Debug] Memory fully cleared.\n";
+#endif // --- END DEBUG ---
 }
+
+// Created to zero memory | Will also clear debug counters
+// Used with CPU process
+void Memory::Clear() {
+    mem.fill(0x00);
+// ---DEBUG MODE ---
+// Initialize debug tracking counters and snapshot
+#ifdef ENABLE_CPU_TESTING
+    snapshot.clear();
+    readCounts.clear();
+    writeCounts.clear();
+    watchpoints.clear();
+    std::cout << "[Debug] Memory fully cleared.\n";
+#endif // --- END DEBUG ---
+}
+
 
 //================== Core Memory Access ======================
 

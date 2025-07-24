@@ -36,7 +36,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     // Default initial image. Example frame of the game.
-    currentRenderedImage = QImage(":/images/frames/frame1.png");
+    currentRenderedImage = QImage(":/resources/frame1.png");
+
+    // Color mask used to set up screen colors.
+    colorMask = QImage(":/resources/color_mask.png");
 }
 
 MainWindow::~MainWindow()
@@ -133,10 +136,16 @@ void MainWindow::paintEvent(QPaintEvent *event)
     // of the game stays the same, but it's scaled up to any size of the screen.
     // NOTE: We use FastTransformation to avoid bilinear interpolation,
     // otherwise the pixels would look all fuzzy.
-    auto scaled_image = currentRenderedImage.scaled(QSize(width(), height() - MENU_BAR_HEIGHT), Qt::IgnoreAspectRatio, Qt::FastTransformation);
+    QSize scaledSize = QSize(width(), height() - MENU_BAR_HEIGHT);
+    QImage scaledImage = currentRenderedImage.scaled(scaledSize, Qt::IgnoreAspectRatio, Qt::FastTransformation);
+    QImage scaledMask = colorMask.scaled(scaledSize, Qt::IgnoreAspectRatio, Qt::FastTransformation);
 
-    // Update image.
-    painter.drawImage(UPPER_LEFT_CORNER, scaled_image);
+    // Update monochrome image.
+    painter.drawImage(UPPER_LEFT_CORNER, scaledImage);
+
+    // Multiply the mask to pain the white pixels with all the colors from the mask.
+    painter.setCompositionMode(QPainter::CompositionMode_Multiply);
+    painter.drawImage(UPPER_LEFT_CORNER, scaledMask);
 }
 
 void MainWindow::on_frameBufferReceived(const frame_buffer_t *buffer)

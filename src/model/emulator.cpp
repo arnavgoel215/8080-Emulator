@@ -11,9 +11,11 @@
 #include "emulator.hpp"
 #include <iostream>
 #include <algorithm> // For std::copy
+#include "memory.hpp"
+#include "romloader.hpp"
 
 /***************** Macros and defines. ***********************/
-constexpr size_t MEMORY_SIZE = 0x10000; // 64KB memory for the 8080
+
 
 /***************** Namespaces. ***********************/
 
@@ -28,14 +30,7 @@ constexpr size_t MEMORY_SIZE = 0x10000; // 64KB memory for the 8080
  */
 Emulator::Emulator()
 {
-    memory.resize(MEMORY_SIZE);
     reset();
-}
-
-void Emulator::loadROM(const std::vector<uint8_t>& romData)
-{
-    // Simple ROM loading starting at address 0x0000
-    std::copy(romData.begin(), romData.end(), memory.begin());
 }
 
 void Emulator::reset()
@@ -43,7 +38,8 @@ void Emulator::reset()
     state = {}; // Zero-initialize all registers and flags
     state.pc = 0x0000; // Start execution from the beginning of memory
     state.sp = 0x0000;
-    std::fill(memory.begin(), memory.end(), 0);
+    memory.Clear();
+    LoadSpaceInvadersROM(memory);
 }
 
 void Emulator::emulateCycles(int cycles)
@@ -53,7 +49,7 @@ void Emulator::emulateCycles(int cycles)
     // For now, we'll treat it as "number of instructions to execute".
     for (int i = 0; i < cycles; ++i)
     {
-        if (state.pc >= memory.size())
+        if (state.pc >= 0xFFFF)
         {
             // Prevent execution from running off the end of memory
             break; 
@@ -64,7 +60,7 @@ void Emulator::emulateCycles(int cycles)
 
 void Emulator::executeInstruction()
 {
-    uint8_t opcode = memory[state.pc];
+     uint8_t opcode = memory.ReadByte(state.pc);
     // PC is incremented in the opcode function
 
     // Checks for MOV opcodes.
@@ -154,7 +150,7 @@ void Emulator::executeInstruction()
         case 0x83: op_ADD(state.e); break;  // ADD E
         case 0x84: op_ADD(state.h); break;  // ADD H
         case 0x85: op_ADD(state.l); break;  // ADD L
-        case 0x86: op_ADD(memory[hl()]); break;  // ADD M
+        case 0x86: op_ADD(memory.ReadByte(hl())); break;   // ADD M
         case 0x87: op_ADD(state.a); break;  // ADD A
         case 0x88: op_ADC(state.b); break;  // ADC B
         case 0x89: op_ADC(state.c); break;  // ADC C
@@ -162,15 +158,15 @@ void Emulator::executeInstruction()
         case 0x8B: op_ADC(state.e); break;  // ADC E
         case 0x8C: op_ADC(state.h); break;  // ADC H
         case 0x8D: op_ADC(state.l); break;  // ADC L
-        case 0x8E: op_ADC(memory[hl()]); break;  // ADC M
+        case 0x8E: op_ADC(memory.ReadByte(hl())); break;   // ADC M
         case 0x8F: op_ADC(state.a); break;  // ADC A
         case 0x90: op_SUB(state.b); break;  // SUB B
         case 0x91: op_SUB(state.c); break;  // SUB C
         case 0x92: op_SUB(state.d); break;  // SUB D
         case 0x93: op_SUB(state.e); break;  // SUB E
         case 0x94: op_SUB(state.h); break;  // SUB H
-        case 0x95: op_SUB(state.h); break;  // SUB L
-        case 0x96: op_SUB(memory[hl()]); break;  // SUB M
+        case 0x95: op_SUB(state.l); break;  // SUB L
+        case 0x96: op_SUB(memory.ReadByte(hl())); break;  // SUB M
         case 0x97: op_SUB(state.a); break;  // SUB A
         case 0x98: op_SBB(state.b); break;  // SBB B
         case 0x99: op_SBB(state.c); break;  // SBB C
@@ -178,7 +174,7 @@ void Emulator::executeInstruction()
         case 0x9B: op_SBB(state.e); break;  // SBB E
         case 0x9C: op_SBB(state.h); break;  // SBB H
         case 0x9D: op_SBB(state.l); break;  // SBB L
-        case 0x9E: op_SBB(memory[hl()]); break;  // SBB M
+        case 0x9E: op_SBB(memory.ReadByte(hl())); break;  // SBB M
         case 0x9F: op_SBB(state.a); break;  // SBB A
         case 0xA0: op_ANA(state.b); break;  // ANA B
         case 0xA1: op_ANA(state.c); break;  // ANA C
@@ -186,7 +182,7 @@ void Emulator::executeInstruction()
         case 0xA3: op_ANA(state.e); break;  // ANA E
         case 0xA4: op_ANA(state.h); break;  // ANA H
         case 0xA5: op_ANA(state.l); break;  // ANA L
-        case 0xA6: op_ANA(memory[hl()]); break;  // ANA M
+        case 0xA6: op_ANA(memory.ReadByte(hl())); break;  // ANA M
         case 0xA7: op_ANA(state.a); break;  // ANA A
         case 0xA8: op_XRA(state.b); break;  // XRA B
         case 0xA9: op_XRA(state.c); break;  // XRA C
@@ -194,7 +190,7 @@ void Emulator::executeInstruction()
         case 0xAB: op_XRA(state.e); break;  // XRA E
         case 0xAC: op_XRA(state.h); break;  // XRA H
         case 0xAD: op_XRA(state.l); break;  // XRA L
-        case 0xAE: op_XRA(memory[hl()]); break;  // XRA M
+        case 0xAE: op_XRA(memory.ReadByte(hl())); break; // XRA M
         case 0xAF: op_XRA(state.a); break;  // XRA A
         case 0xB0: op_ORA(state.b); break;  // ORA B
         case 0xB1: op_ORA(state.c); break;  // ORA C
@@ -202,7 +198,7 @@ void Emulator::executeInstruction()
         case 0xB3: op_ORA(state.e); break;  // ORA E
         case 0xB4: op_ORA(state.h); break;  // ORA H
         case 0xB5: op_ORA(state.l); break;  // ORA L
-        case 0xB6: op_ORA(memory[hl()]); break;  // ORA M
+        case 0xB6: op_ORA(memory.ReadByte(hl())); break;  // ORA M
         case 0xB7: op_ORA(state.a); break;  // ORA A
         case 0xB8: op_CMP(state.b); break;  // CMP B
         case 0xB9: op_CMP(state.c); break;  // CMP C
@@ -210,40 +206,40 @@ void Emulator::executeInstruction()
         case 0xBB: op_CMP(state.e); break;  // CMP E
         case 0xBC: op_CMP(state.h); break;  // CMP H
         case 0xBD: op_CMP(state.l); break;  // CMP L
-        case 0xBE: op_CMP(memory[hl()]); break;  // CMP M
+        case 0xBE: op_CMP(memory.ReadByte(hl())); break;  // CMP M
         case 0xBF: op_CMP(state.a); break;  // CMP A
         case 0xC0: op_RET_cond(!state.flags.z); break;  // RNZ
         case 0xC2: op_JMP_cond(!state.flags.z); break;  // JNZ addr
         case 0xC4: op_CALL_cond(!state.flags.z); break;  // CNZ addr
-        case 0xC6: op_ADD(memory[state.pc++]); break;  // ADI d8
+        case 0xC6: op_ADD(memory.ReadByte(state.pc++)); break;  // ADI d8
         case 0xC8: op_RET_cond(state.flags.z); break;  // RZ
         case 0xCA: op_JMP_cond(state.flags.z); break;  // JZ addr
         case 0xCC: op_CALL_cond(state.flags.z); break; // CZ addr
-        case 0xCE: op_ADD(memory[state.pc++]); break;  // ACI d8
+        case 0xCE: op_ADD(memory.ReadByte(state.pc++)); break;  // ACI d8
         case 0xD0: op_RET_cond(!state.flags.cy); break;  // RNC
         case 0xD2: op_JMP_cond(!state.flags.cy); break;  // JNC addr
         case 0xD4: op_CALL_cond(!state.flags.cy); break;  // CNC addr
-        case 0xD6: op_SUB(memory[state.pc++]); break;  // SUI d8
+        case 0xD6: op_SUB(memory.ReadByte(state.pc++)); break;  // SUI d8
         case 0xD8: op_RET_cond(state.flags.cy); break;  // RC
         case 0xDA: op_RET_cond(state.flags.cy); break;  // JC addr
         case 0xDC: op_CALL_cond(state.flags.cy); break;  // CC addr
-        case 0xDE: op_SBB(memory[state.pc++]); break;  // SBI d8
+        case 0xDE: op_SBB(memory.ReadByte(state.pc++)); break;  // SBI d8
         case 0xE0: op_RET_cond(!state.flags.p); break;  // RPO
         case 0xE2: op_JMP_cond(!state.flags.p); break;  // JPO addr
         case 0xE4: op_CALL_cond(!state.flags.p); break;  // CPO addr
-        case 0xE6: op_ANA(memory[state.pc++]); break;  // ANI d8
+        case 0xE6: op_ANA(memory.ReadByte(state.pc++)); break; // ANI d8
         case 0xE8: op_RET_cond(state.flags.p); break;  // RPE
         case 0xEA: op_JMP_cond(state.flags.p); break;  // JPE addr
         case 0xEC: op_CALL_cond(state.flags.p); break;  // CPE addr
-        case 0xEE: op_XRA(memory[state.pc++]); break;  // XRI d8
+        case 0xEE: op_XRA(memory.ReadByte(state.pc++)); break; // XRI d8
         case 0xF0: op_RET_cond(!state.flags.s); break;  // RP
         case 0xF2: op_JMP_cond(!state.flags.s); break;  // JP addr
         case 0xF4: op_CALL_cond(!state.flags.s); break;  // CP addr
-        case 0xF6: op_ORA(memory[state.pc++]); break;  // ORI d8
+        case 0xF6: op_ORA(memory.ReadByte(state.pc++)); break; // ORI d8
         case 0xF8: op_RET_cond(state.flags.s); break;  // RM
         case 0xFA: op_JMP_cond(state.flags.s); break;  // JM addr
         case 0xFC: op_CALL_cond(state.flags.s); break;  // CM addr
-        case 0xFE: op_CMP(memory[state.pc++]); break;  // CPI d8
+        case 0xFE: op_CMP(memory.ReadByte(state.pc++)); break;  // CPI d8
         case 0xD3: op_OUT(); break;  // OUT d8
         case 0xDB: op_IN(); break;  // IN d8
 
@@ -263,135 +259,135 @@ void Emulator::executeInstruction()
 // 0x01: LXI B,d16
 void Emulator::op_LXI_B()
 { 
-    state.c = memory[state.pc + 1];
-    state.b = memory[state.pc + 2];
+    state.c = memory.ReadByte(state.pc + 1);
+    state.b = memory.ReadByte(state.pc + 2);
     state.pc += 3;
 }
 // 0x02: STAX B
 void Emulator::op_STAX_B()
 {
     uint16_t addr = (state.b << 8) | state.c;
-    memory[addr] = state.a;
+    memory.WriteByte(addr, state.a);
     state.pc += 1;
 }
 // 0x06: MVI B,d8
 void Emulator::op_MVI_B()
 {
-    state.b = memory[state.pc + 1];
+    state.b = memory.ReadByte(state.pc + 1);
     state.pc += 2;
 }
 // 0x0A: LDAX B
 void Emulator::op_LDAX_B()
 {
     uint16_t addr = (state.b << 8) | state.c;
-    state.a = memory[addr];
+    state.a = memory.ReadByte(addr);
     state.pc += 1;
 }
 // 0x0E: MVI C,d8
 void Emulator::op_MVI_C()
 {
-    state.c = memory[state.pc + 1];
+    state.c = memory.ReadByte(state.pc + 1);
     state.pc += 2;
 }
 // 0x11: LXI D,d16
 void Emulator::op_LXI_D()
 {
-    state.e = memory[state.pc + 1];
-    state.d = memory[state.pc + 2];
+    state.e = memory.ReadByte(state.pc + 1); 
+    state.d = memory.ReadByte(state.pc + 2); 
     state.pc += 3;
 }
 // 0x12: STAX D
 void Emulator::op_STAX_D()
 {
     uint16_t addr = (state.d << 8) | state.e;
-    memory[addr] = state.a;
+    memory.WriteByte(addr, state.a); 
     state.pc += 1;
 }
 // 0x16: MVI D,d8
 void Emulator::op_MVI_D()
 {
-    state.d = memory[state.pc + 1];
+    state.d = memory.ReadByte(state.pc + 1);
     state.pc += 2;
 }
 // 0x1A: LDAX D
 void Emulator::op_LDAX_D()
 {
     uint16_t addr = (state.d << 8) | state.e;
-    state.a = memory[addr];
+    state.a = memory.ReadByte(addr); 
     state.pc += 1;
 }
 // 0x1E: MVI E,d8
 void Emulator::op_MVI_E()
 {
-    state.e = memory[state.pc + 1];
+    state.e = memory.ReadByte(state.pc + 1);
     state.pc += 2;
 }
 // 0x21: LXI H,d16
 void Emulator::op_LXI_H()
 {
-    state.l = memory[state.pc + 1];
-    state.h = memory[state.pc + 2];
+    state.l = memory.ReadByte(state.pc + 1); 
+    state.h = memory.ReadByte(state.pc + 2);
     state.pc += 3;
 }
 // 0x22: SHLD addr
 void Emulator::op_SHLD()
 {
-    uint16_t addr = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
-    memory[addr] = state.l;
-    memory[addr + 1] = state.h;
+    uint16_t addr = (memory.ReadByte(state.pc + 2) << 8) | memory.ReadByte(state.pc + 1); 
+    memory.WriteByte(addr, state.l);           
+    memory.WriteByte(addr + 1, state.h);
     state.pc += 3;
 }
 // 0x26: MVI H,d8
 void Emulator::op_MVI_H()
 {
-    state.h = memory[state.pc + 1];
+    state.h = memory.ReadByte(state.pc + 1);
     state.pc += 2;
 }
 // 0x2A: LHLD addr
 void Emulator::op_LHLD()
 {
-    uint16_t addr = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
-    state.l = memory[addr];
-    state.h = memory[addr + 1];
+    uint16_t addr = (memory.ReadByte(state.pc + 2) << 8) | memory.ReadByte(state.pc + 1); 
+    state.l = memory.ReadByte(addr);              
+    state.h = memory.ReadByte(addr + 1); 
     state.pc += 3;
 }
 // 0x2E: MVI L,d8
 void Emulator::op_MVI_L()
 {
-    state.l = memory[state.pc + 1];
+    state.l = memory.ReadByte(state.pc + 1);
     state.pc += 2;
 }
 // 0x31: LXI SP,d16
 void Emulator::op_LXI_SP()
 {
-    state.sp = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
+    state.sp = (memory.ReadByte(state.pc + 2) << 8) | memory.ReadByte(state.pc + 1);
     state.pc += 3;
 }
 // 0x32: STA addr
 void Emulator::op_STA()
 {
-    uint16_t addr = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
-    memory[addr] = state.a;
+    uint16_t addr = (memory.ReadByte(state.pc + 2) << 8) | memory.ReadByte(state.pc + 1); 
+    memory.WriteByte(addr, state.a);
     state.pc += 3;
 }
 // 0x36: MVI M,d8
 void Emulator::op_MVI_M()
 {
     uint16_t addr = (state.h << 8) | state.l;
-    memory[addr] = memory[state.pc + 1];
+    memory.WriteByte(addr, memory.ReadByte(state.pc + 1)); 
     state.pc += 2;
 }
 // 0x3A: LDA addr
 void Emulator::op_LDA()
 {
-    uint16_t addr = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
-    state.a = memory[addr];
+    uint16_t addr = (memory.ReadByte(state.pc + 2) << 8) | memory.ReadByte(state.pc + 1); 
+    state.a = memory.ReadByte(addr); 
     state.pc += 3;
 }
 // 0x3E: MVI A,d8
 void Emulator::op_MVI_A()
 {
-    state.a = memory[state.pc + 1];
+    state.a = memory.ReadByte(state.pc + 1);
     state.pc += 2;
 }
 // 0xEB: XCHG
@@ -643,24 +639,26 @@ void Emulator::op_INR_L()
 void Emulator::op_INR_M()
 {
     uint16_t addr = (state.h << 8) | state.l;
-    uint8_t result = memory[addr] + 1;
+    uint8_t original = memory.ReadByte(addr); 
+    uint8_t result = original + 1;
     state.flags.z = (result == 0);
     state.flags.s = ((result & 0x80) != 0);
     state.flags.p = __builtin_parity(result);
-    state.flags.ac = ((memory[addr] & 0x0F) + 1) > 0x0F;
-    memory[addr] = result;
+    state.flags.ac = ((original & 0x0F) + 1) > 0x0F;
+    memory.WriteByte(addr, result); 
     state.pc += 1;
 }
 // 0x35: DCR M
 void Emulator::op_DCR_M()
 {
     uint16_t addr = (state.h << 8) | state.l;
-    uint8_t result = memory[addr] - 1;
+    uint8_t original = memory.ReadByte(addr);
+    uint8_t result = original - 1;
     state.flags.z = (result == 0);
     state.flags.s = ((result & 0x80) != 0);
     state.flags.p = __builtin_parity(result);
-    state.flags.ac = ((memory[addr] & 0x0F) - 1) < 0;
-    memory[addr] = result;
+    state.flags.ac = ((original & 0x0F) - 1) < 0;
+    memory.WriteByte (addr, result);
     state.pc += 1;
 }
 // 0x39: DAD SP
@@ -841,22 +839,22 @@ void Emulator::op_CMP(uint8_t val)
 // 0xC3: JMP addr
 void Emulator::op_JMP()
 {
-    state.pc = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
+    state.pc = (memory.ReadByte(state.sp + 1) << 8) | memory.ReadByte(state.sp);
 }
 // 0xC9: RET
 void Emulator::op_RET()
 {
-    state.pc = (memory[state.sp + 1] << 8) | memory[state.sp];
+    state.pc = (memory.ReadByte(state.sp + 1) << 8) | memory.ReadByte(state.sp);
     state.sp += 2;
 }
 // 0xCD: CALL addr
 void Emulator::op_CALL()
 {
     uint16_t ret_addr = state.pc + 3;
-    memory[state.sp - 1] = (ret_addr >> 8) & 0xFF;
-    memory[state.sp - 2] = ret_addr & 0xFF;
+    memory.WriteByte(state.sp - 1, (ret_addr >> 8) & 0xFF);
+    memory.WriteByte(state.sp - 2, ret_addr & 0xFF); 
     state.sp -= 2;
-    state.pc = (memory[state.pc + 2] << 8) | memory[state.pc + 1];
+    state.pc = (memory.ReadByte(state.pc + 2) << 8) | memory.ReadByte(state.pc + 1);
 }
 // 0xE9: PCHL
 void Emulator::op_PCHL()
@@ -872,21 +870,21 @@ void Emulator::op_RET_cond(bool condition)
 // Handles jump conditionals
 void Emulator::op_JMP_cond(bool condition)
 {
-    uint16_t addr = memory[state.pc] | (memory[state.pc + 1] << 8);
+     uint16_t addr = memory.ReadByte(state.pc) | (memory.ReadByte(state.pc + 1) << 8);
     if (condition)
-        state.pc;
+        state.pc = addr;
     else
         state.pc += 2;
 }
 // Handles call conditionals
 void Emulator::op_CALL_cond(bool condition)
 {
-    uint16_t addr = memory[state.pc] | (memory[state.pc + 1] << 8);
+    uint16_t addr = memory.ReadByte(state.pc) | (memory.ReadByte(state.pc + 1) << 8); // replaced
     if (condition)
     {
         state.pc += 2;
-        memory[state.sp--] = (state.pc >> 8) & 0xFF;
-        memory[state.sp--] = state.pc & 0xFF;
+        memory.WriteByte(--state.sp, (state.pc >> 8) & 0xFF);
+        memory.WriteByte(--state.sp, state.pc & 0xFF);  
         state.pc = addr;
     }
     else
@@ -907,77 +905,81 @@ void Emulator::op_HLT()
 // 0xC1: POP B
 void Emulator::op_POP_B()
 {
-    state.c = memory[state.sp];
-    state.b = memory[state.sp + 1];
+    state.c = memory.ReadByte(state.sp);       
+    state.b = memory.ReadByte(state.sp + 1); 
     state.sp += 2;
     state.pc += 1;
 }
 // 0xC5: PUSH B
 void Emulator::op_PUSH_B()
 {
-    memory[state.sp - 1] = state.b;
-    memory[state.sp - 2] = state.c;
+    memory.WriteByte(state.sp - 1, state.b); 
+    memory.WriteByte(state.sp - 2, state.c); 
     state.sp -= 2;
     state.pc += 1;
 }
 // 0xD1: POP D
 void Emulator::op_POP_D()
 {
-    state.e = memory[state.sp];
-    state.d = memory[state.sp + 1];
+    state.e = memory.ReadByte(state.sp);         
+    state.d = memory.ReadByte(state.sp + 1);
     state.sp += 2;
     state.pc += 1;
 }
 // 0xD5: PUSH D
 void Emulator::op_PUSH_D()
 {
-    memory[state.sp - 1] = state.d;
-    memory[state.sp - 2] = state.e;
+    memory.WriteByte(state.sp - 1, state.d);  
+    memory.WriteByte(state.sp - 2, state.e);  
     state.sp -= 2;
     state.pc += 1;
 }
 // 0xE1: POP H
 void Emulator::op_POP_H()
 {
-    state.l = memory[state.sp];
-    state.h = memory[state.sp + 1];
+    state.l = memory.ReadByte(state.sp);         
+    state.h = memory.ReadByte(state.sp + 1); 
     state.sp += 2;
     state.pc += 1;
 }
 // 0xE3: XTHL
 void Emulator::op_XTHL()
 {
-    std::swap(state.l, memory[state.sp]);
-    std::swap(state.h, memory[state.sp + 1]);
+    uint8_t temp_l = memory.ReadByte(state.sp);       
+    uint8_t temp_h = memory.ReadByte(state.sp + 1);   
+    memory.WriteByte(state.sp,     state.l);          
+    memory.WriteByte(state.sp + 1, state.h);
     state.pc += 1;
 }
 // 0xE5: PUSH H
 void Emulator::op_PUSH_H()
 {
-    memory[state.sp - 1] = state.h;
-    memory[state.sp - 2] = state.l;
+    memory.WriteByte(state.sp - 1, state.h);    
+    memory.WriteByte(state.sp - 2, state.l); 
     state.sp -= 2;
     state.pc += 1;
 }
 // 0xF1: POP PSW
 void Emulator::op_POP_PSW()
 {
-    uint8_t psw = memory[state.sp];
+    uint8_t psw = memory.ReadByte(state.sp);
     state.flags.cy = (psw & 0x01) != 0;
     state.flags.p = (psw & 0x04) != 0;
     state.flags.ac = (psw & 0x10) != 0;
     state.flags.z = (psw & 0x40) != 0;
     state.flags.s = (psw & 0x80) != 0;
-    state.a = memory[state.sp + 1];
+    state.a = memory.ReadByte(state.sp + 1); 
     state.sp += 2;
     state.pc += 1;
 }
 // 0xF5: PUSH PSW
 void Emulator::op_PUSH_PSW()
 {
-    memory[state.sp - 1] = state.a;
-    uint8_t psw = (state.flags.s << 7) | (state.flags.z << 6) | (state.flags.ac << 4) | (state.flags.p << 2) | (state.flags.cy << 0) | 0x02;
-    memory[state.sp - 2] = psw;
+    memory.WriteByte(state.sp - 1, state.a);            
+    uint8_t psw = (state.flags.s << 7) | (state.flags.z << 6) |
+                  (state.flags.ac << 4) | (state.flags.p << 2) |
+                  (state.flags.cy << 0) | 0x02;
+    memory.WriteByte(state.sp - 2, psw); 
     state.sp -= 2;
     state.pc += 1;
 }
@@ -990,13 +992,13 @@ void Emulator::op_EI()
 // 0xDB: IN d8
 void Emulator::op_IN()
 {
-    uint8_t port = memory[state.pc++];
+    uint8_t port = memory.ReadByte(state.pc++);
     io_read(port);
 }
 // 0xD3: OUT d8 
 void Emulator::op_OUT()
 {
-    uint8_t port = memory[state.pc++];
+    uint8_t port = memory.ReadByte(state.pc++); 
     state.a = io_write(port, state.a);
 }
 
@@ -1005,8 +1007,9 @@ void Emulator::requestInterrupt(uint8_t interrupt_num)
     if (state.interrupts_enabled)
     {
         // Push PC onto stack
-        memory[state.sp - 1] = (state.pc >> 8) & 0xFF;
-        memory[state.sp - 2] = state.pc & 0xFF;
+        memory.WriteByte(state.sp - 1, (state.pc >> 8) & 0xFF); 
+        memory.WriteByte(state.sp - 2, state.pc & 0xFF);        
+
         state.sp -= 2;
 
         // Jump to interrupt service routine
@@ -1026,11 +1029,7 @@ CPUState Emulator::getCPUState() const
 const uint8_t* Emulator::getFrameBuffer() const
 {
     // The framebuffer for Space Invaders starts at 0x2400
-    if (memory.size() >= 0x2400 + VRAM_SIZE)
-    {
-        return &memory[0x2400];
-    }
-    return nullptr;
+    return memory.GetVRAMPointer();
 }
 
 void Emulator::setFlags(uint8_t result)
@@ -1083,6 +1082,7 @@ uint8_t Emulator::io_write(uint8_t port, uint8_t val)
             std::cout << "Unknown OUT port " << std::hex << (int)port << ": " << (int)val << "\n";
             break;
     }
+    return 0;
 }
 
 uint8_t Emulator::get_reg(uint8_t code)
