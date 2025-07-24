@@ -1095,7 +1095,7 @@ uint8_t Emulator::get_reg(uint8_t code)
         case REG_E: return state.e;
         case REG_H: return state.h;
         case REG_L: return state.l;
-        case REG_M: return memory[hl()];
+        case REG_M: return memory.ReadByte(hl());
         case REG_A: return state.a;
         default: return 0;
     }
@@ -1111,7 +1111,7 @@ void Emulator::set_reg(uint8_t code, uint8_t val)
         case REG_E: state.e = val; break;
         case REG_H: state.h = val; break;
         case REG_L: state.l = val; break;
-        case REG_M: memory[hl()] = val; break;
+        case REG_M: memory.WriteByte(hl(), val);
         case REG_A: state.a = val; break;
     }
 }
