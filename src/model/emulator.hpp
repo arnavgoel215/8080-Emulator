@@ -126,6 +126,20 @@ public:
      */
     const uint8_t* getFrameBuffer() const;
 
+    /**
+     * @brief Defines the registers for the MOV instruction
+     */
+    enum RegisterCode : uint8_t {
+        REG_B = 0,
+        REG_C = 1,
+        REG_D = 2,
+        REG_E = 3,
+        REG_H = 4,
+        REG_L = 5,
+        REG_M = 6,
+        REG_A = 7
+    };
+
 private:
     // --- Internal CPU State ---
     
@@ -167,6 +181,16 @@ private:
      * @brief Handles output from the system
      */
     uint8_t io_write(uint8_t port, uint8_t val);
+
+    /**
+     * @brief Gets value stored in register
+     */
+    uint8_t get_reg(uint8_t code);
+
+    /**
+     * @brief Sets value in register
+     */
+    void set_reg(uint8_t code, uint8_t val);
 
     // --- Opcode Functions ---
 
@@ -343,6 +367,8 @@ private:
     void op_IN();
     /** @brief Handles output from the system */
     void op_OUT();
+    /** @brief Executes MOV instruction */
+    void op_MOV(uint8_t opcode);
 };
 
 #endif /* EMULATOR_HPP_ */
