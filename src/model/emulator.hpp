@@ -101,6 +101,20 @@ public:
      */
     const uint8_t* getFrameBuffer() const;
 
+    /**
+     * @brief Defines the registers for the MOV instruction
+     */
+    enum Registers : uint8_t {
+        REG_B = 0,
+        REG_C = 1,
+        REG_D = 2,
+        REG_E = 3,
+        REG_H = 4,
+        REG_L = 5,
+        REG_M = 6,
+        REG_A = 7
+    };
+
 private:
     // --- Internal CPU State ---
     
