@@ -9,6 +9,7 @@
 
 /***************** Include files. ***********************/
 #include "controller.hpp"
+#include "view/mainwindow.h"
 
 /***************** Macros and defines. ***********************/
 
@@ -19,3 +20,8 @@
 /***************** Local Functions. ***********************/
 
 /***************** Global Class Functions. ***********************/
+
+Controller::Controller(Emulator* model, MainWindow* view)
+{
+    // TODO: Initialize members
+}

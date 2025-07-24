@@ -18,7 +18,7 @@
 /***************** Global Classes. ***********************/
 // Forward-declaration of the View's main window class to avoid including Qt headers here.
 // This breaks the circular dependency between Controller and View.
-class MainView; 
+class MainWindow; 
 
 /**
  * @brief An enumeration of all possible game inputs.
@@ -44,7 +44,7 @@ public:
      * @param model A pointer to the Emulator instance.
      * @param view A pointer to the MainView instance.
      */
-    Controller(Emulator* model, MainView* view);
+    Controller(Emulator* model, MainWindow* view);
 
     // --- User Action Handlers (called by the View) ---
 
