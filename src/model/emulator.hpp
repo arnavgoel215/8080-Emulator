@@ -84,6 +84,7 @@ public:
 }
 #endif // --- END DEBUG ---
 
+public:
     /**
      * @brief Default constructor. Initializes the CPU state.
      */
@@ -91,9 +92,9 @@ public:
 
     /**
      * @brief Loads a ROM file's contents into the emulator's memory.
-     * @param romData A vector of bytes containing the ROM file.
+     * @param romFilePath The path to the ROM file.
      */
-    void loadROM(const std::vector<uint8_t>& romData);
+    void loadROM(const std::string& romFilePath);
 
     /**
      * @brief Resets the emulator to its initial power-on state.

@@ -39,7 +39,13 @@ void Emulator::reset()
     state.pc = 0x0000; // Start execution from the beginning of memory
     state.sp = 0x0000;
     memory.Clear();
-    LoadSpaceInvadersROM(memory);
+    LoadSpaceInvadersROM(memory, "rom/");
+}
+
+void Emulator::loadROM(const std::string& romFilePath)
+{
+    // Load the given ROM file starting at address 0x0000
+    LoadROMFile(romFilePath, memory, 0x0000);
 }
 
 void Emulator::emulateCycles(int cycles)

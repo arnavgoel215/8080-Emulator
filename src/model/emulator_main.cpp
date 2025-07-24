@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <iomanip> // For std::hex and std::setw
+#include <fstream> // For std::ofstream
 #include "emulator.hpp"
 
 /***************** Macros and defines. ***********************/
@@ -42,9 +43,15 @@ int main (int argc, char * argv[])
 {
     Emulator emulator;
     
-    // Create a simple program with 5 NOP instructions
+    // Create a simple program with 5 NOP instructions and write it to a temp file
+    const char* test_rom_path = "build/nop_test.rom";
     std::vector<uint8_t> rom = {0x00, 0x00, 0x00, 0x00, 0x00};
-    emulator.loadROM(rom);
+    std::ofstream rom_file(test_rom_path, std::ios::out | std::ios::binary);
+    rom_file.write(reinterpret_cast<const char*>(rom.data()), rom.size());
+    rom_file.close();
+
+    // Load the test ROM
+    emulator.loadROM(test_rom_path);
 
     std::cout << "--- 8080 NOP Instruction Test ---" << std::endl;
     
