@@ -68,16 +68,12 @@ void Emulator::executeInstruction()
     // PC is incremented in the opcode function
 
     // Checks for MOV opcodes.
-    if ((opcode & 0xC0) == 0x40)
+    if ((opcode & 0xC0) == 0x40 && opcode != 0x76) // 0x76 is the opcode for HLT and not a MOV opcode
     {
-        uint8_t dst = (opcode >> 3) & 0x07;  // Determines which register to set
-        uint8_t src = opcode & 0x07;  // Determines which register to get value from
-        if (opcode != 0x76)  // 0x76 is the opcode for HLT and not a MOV opcode
-        {
-            uint8_t val = get_reg(src);
-            set_reg(dst, val);  // MOV operation
-            return;
-        }
+        RegisterCode dst = (RegisterCode)((opcode >> 3) & 0x07);  // Determines which register to set
+        RegisterCode src = (RegisterCode)(opcode & 0x07);  // Determines which register to get value from
+        set_reg(dst, get_reg(src));
+        return;
     }
 
     // Switch statement for rest of the opcodes
@@ -1093,14 +1089,14 @@ uint8_t Emulator::get_reg(uint8_t code)
 {
     switch (code) 
     {
-        case 0: return state.b;
-        case 1: return state.c;
-        case 2: return state.d;
-        case 3: return state.e;
-        case 4: return state.h;
-        case 5: return state.l;
-        case 6: return memory[hl()];
-        case 7: return state.a;
+        case REG_B: return state.b;
+        case REG_C: return state.c;
+        case REG_D: return state.d;
+        case REG_E: return state.e;
+        case REG_H: return state.h;
+        case REG_L: return state.l;
+        case REG_M: return memory[hl()];
+        case REG_A: return state.a;
         default: return 0;
     }
 }
@@ -1109,13 +1105,13 @@ void Emulator::set_reg(uint8_t code, uint8_t val)
 {
     switch (code)
     {
-        case 0: state.b = val; break;
-        case 1: state.c = val; break;
-        case 2: state.d = val; break;
-        case 3: state.e = val; break;
-        case 4: state.h = val; break;
-        case 5: state.l = val; break;
-        case 6: memory[hl()] = val; break;
-        case 7: state.a = val; break;
+        case REG_B: state.b = val; break;
+        case REG_C: state.c = val; break;
+        case REG_D: state.d = val; break;
+        case REG_E: state.e = val; break;
+        case REG_H: state.h = val; break;
+        case REG_L: state.l = val; break;
+        case REG_M: memory[hl()] = val; break;
+        case REG_A: state.a = val; break;
     }
 }

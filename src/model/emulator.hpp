@@ -104,7 +104,7 @@ public:
     /**
      * @brief Defines the registers for the MOV instruction
      */
-    enum Registers : uint8_t {
+    enum RegisterCode : uint8_t {
         REG_B = 0,
         REG_C = 1,
         REG_D = 2,
