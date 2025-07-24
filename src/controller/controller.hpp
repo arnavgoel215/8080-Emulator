@@ -67,16 +67,15 @@ public:
     void runFrame();
 
 private:
-    /**
-     * @brief Updates the state of a game control.
-     * @param input The specific game input being changed.
-     * @param isPressed The state of the input (true for pressed, false for released).
-     */
-    void setInputState(GameInput input, bool isPressed);
-
+    // --- Private Members ---
     Emulator* m_model;
     MainWindow* m_view;
     bool m_isRunning;
+
+    // --- Constants ---
+    // The original arcade machine had a 2MHz CPU and a 60Hz refresh rate.
+    // This gives us approximately 33,333 cycles per frame.
+    static constexpr int CYCLES_PER_FRAME = 33333; 
 };
 
 #endif /* CONTROLLER_HPP_ */
