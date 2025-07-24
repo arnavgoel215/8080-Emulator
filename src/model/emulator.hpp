@@ -12,15 +12,18 @@
 #define EMULATOR_HPP_
 
 /***************** Include files. ***********************/
+// Memory.hpp - Integrating memory with CPU
+#include "memory.hpp"
 #include <cstdint>
 #include <vector>
 #include <string>
 
 /***************** Macros and defines. ***********************/
 // The size of the Space Invaders Video RAM in bytes. (256x224 pixels / 8 bits per byte)
-constexpr size_t VRAM_SIZE = 7168;
+// constexpr size_t VRAM_SIZE = 7168;
 
 /***************** Global Classes. ***********************/
+
 
 /**
  * @brief A plain data structure to hold a snapshot of the CPU's state for debugging.
@@ -56,8 +59,30 @@ struct CPUState
  */
 class Emulator
 {
+// --- DEBUG MODE --- 
+// Expose the Memory private class ONLY while testing and DEBUGGING
+#ifdef ENABLE_CPU_TESTING
 public:
     // --- Lifecycle and Control ---
+
+
+    /**
+     *    @brief Enables debug mode for CPU's Memory.
+     *    Allow access to private memory class.
+     *    will not be accessible during normal run time.
+     */
+    Memory& getMemoryRef(){
+        return memory;
+    }
+
+    /**
+     * @brief Grants mutable access to CPU state for testing.
+     *        Only available in DEBUG/UNIT TEST builds.
+     */
+    CPUState& getCPUStateRef() {
+        return state;
+}
+#endif // --- END DEBUG ---
 
     /**
      * @brief Default constructor. Initializes the CPU state.
@@ -111,9 +136,11 @@ private:
 
     /**
      * @brief The 64KB memory space of the 8080.
+     * 64KB RAM - Includes ROM, WAM, VRAM and Debugging support.
      */
-    std::vector<uint8_t> memory;
+    Memory memory;
 
+    
     // --- Helper Functions ---
 
     /**
