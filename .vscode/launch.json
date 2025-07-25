@@ -29,10 +29,10 @@
         ]
     },
     {
-        "name": "Windows - Debug Disassembler",
+        "name": "Windows - Debug Application",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/out/disassembler_main.exe",
+        "program": "${workspaceFolder}/out/space_invaders_emulator.exe",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
@@ -101,10 +101,10 @@
         ]
     },
     {
-        "name": "Linux - Debug Disassembler",
+        "name": "Linux - Debug Application",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/out/disassembler_main",
+        "program": "${workspaceFolder}/out/space_invaders_emulator",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
