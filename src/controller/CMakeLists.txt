@@ -38,5 +38,6 @@ add_executable(controller_main controller_main.cpp)
 target_link_libraries(controller_main
     PUBLIC
     controller
+    emulator
     Qt${QT_VERSION_MAJOR}::Widgets
 )

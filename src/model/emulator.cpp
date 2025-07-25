@@ -1026,6 +1026,15 @@ void Emulator::requestInterrupt(uint8_t interrupt_num)
     }
 }
 
+/**
+ * @brief Sets the state of a game input bit.
+ * @param input The game input to change.
+ * @param isPressed True if the button is pressed, false if released.
+ */
+void Emulator::setInputState(GameInput input, bool isPressed)
+{
+    // TODO
+}
 
 CPUState Emulator::getCPUState() const
 {
