@@ -18,20 +18,7 @@
 /***************** Global Classes. ***********************/
 // Forward-declaration of the View's main window class to avoid including Qt headers here.
 // This breaks the circular dependency between Controller and View.
-class MainView; 
-
-/**
- * @brief An enumeration of all possible game inputs.
- * Used by the Controller to report key presses to the model.
- */
-enum class GameInput
-{
-    Coin,
-    P1_Start,
-    P1_Shoot,
-    P1_Left,
-    P1_Right,
-};
+class MainWindow; 
 
 /**
  * @brief The Controller class, responsible for application logic.
@@ -44,7 +31,7 @@ public:
      * @param model A pointer to the Emulator instance.
      * @param view A pointer to the MainView instance.
      */
-    Controller(Emulator* model, MainView* view);
+    Controller(Emulator* model, MainWindow* view);
 
     // --- User Action Handlers (called by the View) ---
 
@@ -52,31 +39,24 @@ public:
      * @brief Handles the user request to load a ROM file.
      * @param romFilePath The absolute path to the ROM file.
      */
-    void on_loadROM(const std::string& romFilePath);
+    void onLoadROM(const std::string& romFilePath);
 
     /**
      * @brief Handles the user request to toggle the emulation (Start/Pause).
      */
-    void on_toggleRun();
+    void onToggleRun();
 
     /**
      * @brief Handles the user request to reset the emulation.
      */
-    void on_reset();
+    void onReset();
 
     /**
      * @brief Handles a keyboard event from the View.
      * @param key An integer identifying the key (e.g., from Qt::Key).
      * @param isPressed The state of the key (true for pressed, false for released).
      */
-    void on_keyEvent(int key, bool isPressed);
-
-    /**
-     * @brief Updates the state of a game control.
-     * @param input The specific game input being changed.
-     * @param isPressed The state of the input (true for pressed, false for released).
-     */
-    void setInputState(GameInput input, bool isPressed);
+    void onKeyEvent(int key, bool isPressed);
 
     // --- Main Emulation Loop ---
 
@@ -85,6 +65,17 @@ public:
      *        This function should be called repeatedly by a timer in the View (e.g., 60Hz).
      */
     void runFrame();
+
+private:
+    // --- Private Members ---
+    Emulator* m_model;
+    MainWindow* m_view;
+    bool m_isRunning;
+
+    // --- Constants ---
+    // The original arcade machine had a 2MHz CPU and a 60Hz refresh rate.
+    // This gives us approximately 33,333 cycles per frame.
+    static constexpr int CYCLES_PER_FRAME = 33333; 
 };
 
 #endif /* CONTROLLER_HPP_ */

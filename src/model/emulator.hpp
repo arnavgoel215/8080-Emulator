@@ -12,7 +12,6 @@
 #define EMULATOR_HPP_
 
 /***************** Include files. ***********************/
-// Memory.hpp - Integrating memory with CPU
 #include "memory.hpp"
 #include <cstdint>
 #include <vector>
@@ -24,6 +23,19 @@
 
 /***************** Global Classes. ***********************/
 
+/**
+ * @brief An enumeration of all possible game inputs for Space Invaders.
+ * Used by the Controller to report key presses to the model.
+ */
+enum class GameInput
+{
+    Coin,
+    P1_Start,
+    P1_Shoot,
+    P1_Left,
+    P1_Right,
+    // P2 inputs can be added here if needed
+};
 
 /**
  * @brief A plain data structure to hold a snapshot of the CPU's state for debugging.
@@ -45,8 +57,8 @@ struct CPUState
 
     bool interrupts_enabled;
 
-    // I/O ports
-    uint8_t port_in_0 = 0;
+    // I/O ports for Space Invaders hardware
+    uint8_t port_in_0 = 0b00001000; // Bit 3 is always 1
     uint8_t port_in_1 = 0;
     uint8_t port_in_2 = 0;
 
@@ -84,6 +96,7 @@ public:
 }
 #endif // --- END DEBUG ---
 
+public:
     /**
      * @brief Default constructor. Initializes the CPU state.
      */
@@ -91,9 +104,9 @@ public:
 
     /**
      * @brief Loads a ROM file's contents into the emulator's memory.
-     * @param romData A vector of bytes containing the ROM file.
+     * @param romFilePath The path to the ROM file.
      */
-    void loadROM(const std::vector<uint8_t>& romData);
+    void loadROM(const std::string& romFilePath);
 
     /**
      * @brief Resets the emulator to its initial power-on state.
@@ -111,6 +124,13 @@ public:
      * @param interrupt_num The interrupt number (1 or 2 for Space Invaders).
      */
     void requestInterrupt(uint8_t interrupt_num);
+
+    /**
+     * @brief Sets the state of a game input bit.
+     * @param input The game input to change.
+     * @param isPressed True if the button is pressed, false if released.
+     */
+    void setInputState(GameInput input, bool isPressed);
 
     // --- Data Output to Controller ---
 

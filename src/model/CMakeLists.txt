@@ -15,6 +15,8 @@ target_sources(emulator
     PUBLIC
     # <<<< ADD ANY required .cpp files in here. >>>>
     ${CMAKE_CURRENT_LIST_DIR}/emulator.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/memory.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/romloader.cpp
 )
 
 # Set up include directories.
