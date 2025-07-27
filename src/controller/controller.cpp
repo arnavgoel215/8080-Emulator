@@ -1,16 +1,19 @@
 /**********************************************************
  * @file controller.cpp
- * 
+ *
  * @brief Implementation of the Controller class.
- * 
+ *
  * @author: Jesse
- * 
+ * @author Sergio
+ *
  *********************************************************/
 
 /***************** Include files. ***********************/
 #include "controller.hpp"
-#include "view/mainwindow.h"
-#include <QKeyEvent>
+#include "mainwindow.h"
+
+// Qt tools.
+#include <QKeyEvent> // For Qt Key enumrations.
 
 /***************** Macros and defines. ***********************/
 // The VRAM size for Space Invaders is 7168 bytes.
@@ -24,24 +27,56 @@ constexpr size_t VRAM_SIZE = 7168;
 
 /***************** Global Class Functions. ***********************/
 
-Controller::Controller(Emulator* model, MainWindow* view)
-    : m_model(model), m_view(view), m_isRunning(false)
+Controller::Controller(Emulator* model, MainWindow* view, QObject* parent)
+    : QObject{parent}, m_model(model), m_view(view), m_isRunning(false), m_romPath("")
 {
-    // In a fully wired application, the constructor would be the ideal
-    // place to connect signals from the view to the slots in this controller.
-    // For example:
-    // QObject::connect(m_view, &MainWindow::runToggled, this, &Controller::onToggleRun);
-    // QObject::connect(m_view, &MainWindow::resetTriggered, this, &Controller::onReset);
-    // etc.
+    // For some reason dynamic libraries struggle with the new signal/slot syntax,
+    // The older SIGNAL/SLOT macros are more lenient and allow detection of
+    // the interfaces as long as the class is derived from QObject.
+
+    // Key events (View -> Controller).
+    connect(view, SIGNAL(sendKeySignal(int,bool)), this, SLOT(onKeyEvent(int,bool)));
+
+    // Frame buffer events (Controller -> View).
+    connect(this, SIGNAL(sendframeBuffer(const frame_buffer_t*)), view, SLOT(on_frameBufferReceived(const frame_buffer_t*)));
+
+    // ROM Load events (View -> Controller).
+    connect(view, SIGNAL(sendRomPath(const std::string,bool*)), this, SLOT(onLoadROM(const std::string,bool*)));
+
+    // Reset emulation (View -> Controller).
+    connect(view, SIGNAL(sendResetSignal()), this, SLOT(onReset()));
+
+    // Close Game (View -> Controller).
+    connect(view, SIGNAL(sendCloseGameSignal()), this, SLOT(onCloseGame()));
+
+    // Toggle Run (View -> Controller).
+    connect(view, SIGNAL(sendToggleRunSignal()), this, SLOT(onToggleRun()));
 }
 
-void Controller::onLoadROM(const std::string& romFilePath)
+void Controller::onLoadROM(const std::string& romFilePath, bool *isValidRomPath)
 {
     m_isRunning = false;
-    m_model->loadROM(romFilePath);
-    m_model->reset();
-    if (m_view) {
-        // m_view->showStatusMessage("ROM loaded successfully. Press Start.");
+    if (true == m_model->loadROM(romFilePath))
+    {
+        m_model->reset();
+        if (m_view) {
+            // m_view->showStatusMessage("ROM loaded successfully. Press Start.");
+        }
+
+        if (nullptr != isValidRomPath)
+        {
+            *isValidRomPath = true;
+        }
+
+        // Store copy of path.
+        m_romPath = romFilePath;
+    }
+    else
+    {
+        if (nullptr != isValidRomPath)
+        {
+            *isValidRomPath = false;
+        }
     }
 }
 
@@ -57,8 +92,24 @@ void Controller::onReset()
 {
     m_isRunning = false;
     m_model->reset();
-    if (m_view) {
-        // m_view->showStatusMessage("Emulator reset.");
+    if ("" != m_romPath)
+    {
+        m_model->loadROM(m_romPath);
+        
+        if (m_view) {
+            // m_view->showStatusMessage("Game reset.");
+        }
+    }
+}
+
+void Controller::onCloseGame()
+{
+    m_isRunning = false;
+    m_model->reset();
+    m_romPath = ""; // Clear out temporal ROM path.
+    if (m_view) 
+    {
+        // m_view->showStatusMessage("Game closed.");
     }
 }
 
