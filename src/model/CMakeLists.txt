@@ -3,7 +3,6 @@
 # @brief: Emulator (Model) library project.
 #
 # @author: Sergio Chavarria - chavarse@oregonstate.edu
-# @author: <TODO: ADD AUTHORS>
 # 
 #######################################################
 
@@ -17,6 +16,10 @@ target_sources(emulator
     ${CMAKE_CURRENT_LIST_DIR}/emulator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/memory.cpp
     ${CMAKE_CURRENT_LIST_DIR}/romloader.cpp
+    
+    ${CMAKE_CURRENT_LIST_DIR}/emulator.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/memory.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/romloader.hpp
 )
 
 # Set up include directories.

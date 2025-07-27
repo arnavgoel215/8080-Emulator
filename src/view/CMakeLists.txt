@@ -1,10 +1,15 @@
+#######################################################
+# @file CMakeLists.txt
+# @brief: Space invaders Qt GUI (View) library.
+#
+# @author: Sergio Chavarria - chavarse@oregonstate.edu
+# 
+#######################################################
+
+
 cmake_minimum_required(VERSION 3.16)
 
 project(space_invaders_view VERSION 0.1 LANGUAGES CXX)
-
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -74,7 +79,3 @@ install(TARGETS view
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(view)
 endif()
-
-# Test local executable.
-add_executable(space_invaders_view view_main.cpp)
-target_link_libraries(space_invaders_view PUBLIC view)
