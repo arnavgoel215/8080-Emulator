@@ -34,8 +34,12 @@
      <string>File</string>
     </property>
     <addaction name="actionLoad_ROM"/>
+    <addaction name="actionClose_ROM"/>
    </widget>
    <widget class="QMenu" name="menuGame">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Game</string>
     </property>
@@ -60,31 +64,39 @@
   </action>
   <action name="action_Re_Start_Game">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
-    <string>(Re)Start Game</string>
+    <string>(Re)Start Game (R)</string>
    </property>
   </action>
   <action name="actionPause_Game">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
-    <string>Pause Game</string>
+    <string>Pause Game (P)</string>
    </property>
   </action>
   <action name="actionInsert_Coin">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
-    <string>Insert Coin</string>
+    <string>Insert Coin (C)</string>
    </property>
   </action>
   <action name="actionRun_Video_Test">
    <property name="text">
     <string>Run Video Test</string>
+   </property>
+  </action>
+  <action name="actionClose_ROM">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Close ROM</string>
    </property>
   </action>
  </widget>
