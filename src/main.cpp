@@ -1,6 +1,6 @@
-#include "controller/controller.hpp"
-#include "model/emulator.hpp"
-#include "view/mainwindow.h"
+#include "controller.hpp"
+#include "emulator.hpp"
+#include "mainwindow.h"
 
 #include <QApplication>
 
