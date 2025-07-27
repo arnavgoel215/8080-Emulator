@@ -18,3 +18,15 @@ target_link_libraries(space_invaders_emulator
     view
     Qt${QT_VERSION_MAJOR}::Widgets
 )
+
+# --- CLI Runner ---
+# Executable for the command-line version of the emulator
+add_executable(cli_emulator cli_runner.cpp)
+
+# Link libraries for the CLI runner
+target_link_libraries(cli_emulator
+    PRIVATE
+    controller
+    emulator
+    Qt${QT_VERSION_MAJOR}::Widgets
+)

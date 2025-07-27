@@ -8,3 +8,5 @@ out
 CMakeLists.txt.user
 /rom/
 
+# Exclude AI Context folders
+.gemini/
