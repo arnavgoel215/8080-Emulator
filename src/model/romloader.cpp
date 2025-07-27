@@ -25,6 +25,7 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
+#include <filesystem>
 
 
 // ================= Constants ===============================
@@ -93,8 +94,9 @@ bool LoadSpaceInvadersROM(Memory& memory, const std::string& overrideDirectory) 
     // === Load each ROM file ===
     // Loads the Space Invaders files | Aborts on error 
     for (const auto& [filename, address] : romParts) {
-        std::string fullPath = romDirectory + filename;
-        if (!LoadROMFile(fullPath, memory, address)) {
+        std::filesystem::path fullPath = romDirectory;
+        fullPath /= filename;
+        if (!LoadROMFile(fullPath.string(), memory, address)) {
             return false;
         }
     }
