@@ -49,7 +49,55 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionLoad_ROM_triggered()
 {
-    // TODO.
+    // Opens selection dialog, but only to select a folder, and not a file.
+    QString selectedDirectory = QFileDialog::getExistingDirectory(
+        this,
+        "Select the folder where invaders.e/.f/.g/.h are",
+        QDir::currentPath(),
+        QFileDialog::ShowDirsOnly
+    );
+
+    if (false == selectedDirectory.isEmpty())
+    {
+        bool validPath = false;
+        emit sendRomPath(selectedDirectory.toStdString(), &validPath);
+
+        if (true == validPath)
+        {
+            // Enable Game options, disable test options.
+            ui->menuDebug->setDisabled(true);
+            ui->menuGame->setDisabled(false);
+            ui->actionClose_ROM->setDisabled(false);
+            ui->actionLoad_ROM->setDisabled(true);
+
+            romIsLoaded = true;
+        }
+        else
+        {
+            QMessageBox errorBox;
+            errorBox.warning(
+                nullptr,
+                "ROM file not found in selected folder",
+                "Please select a folder where the ROM files are included which are:\n"
+                "invaders.e, invaders.f, invaders.g, and invaders.h"
+            );
+        }
+    }
+}
+
+void MainWindow::on_actionClose_ROM_triggered()
+{
+    // Close game, and reset emulator.
+    emit sendCloseGameSignal();
+
+    // Disable Game options, and enable test options.
+    ui->menuDebug->setDisabled(false);
+    ui->menuGame->setDisabled(true);
+    ui->actionClose_ROM->setDisabled(true);
+    ui->actionLoad_ROM->setDisabled(false);
+
+    // Disable any other game actions.
+    romIsLoaded = false;
 }
 
 void MainWindow::on_action_Re_Start_Game_triggered()
