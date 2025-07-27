@@ -150,7 +150,12 @@ void MainWindow::paintEvent(QPaintEvent *event)
 
 void MainWindow::on_frameBufferReceived(const frame_buffer_t *buffer)
 {
-    // Direclty translate the contents of the frame buffer to a bitmap.
+    if (nullptr == buffer)
+    {
+        return;
+    }
+
+    // Directly translate the contents of the frame buffer to a bitmap.
     // NOTE: The good thing is that the frame data from the original
     // space invaders game runs at 8 pixels per byte, exactly the same
     // as the bitmap structure.
@@ -174,6 +179,26 @@ void MainWindow::on_frameBufferReceived(const frame_buffer_t *buffer)
 
     // Update UI with painted graphics.
     this->update();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    // Avoid repeated events when holding the input.
+    if (false == event->isAutoRepeat())
+    {
+        emit sendKeySignal(event->key(), true);
+        qDebug() << event->text() << "has been pressed";
+    }
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    // Avoid repeated events when holding the input.
+    if (false == event->isAutoRepeat())
+    {
+        emit sendKeySignal(event->key(), false);
+        qDebug() << event->text() << "has been released";
+    }
 }
 
 void MainWindow::calculateFPS(void)
