@@ -66,6 +66,20 @@ public:
      */
     void runFrame();
 
+    // --- CLI / Debug Methods ---
+
+    /**
+     * @brief Executes a single CPU instruction.
+     *        For debugging and command-line execution.
+     */
+    void stepSingleInstruction();
+
+    /**
+     * @brief Gets the current CPU state for debugging.
+     * @return A snapshot of the CPU's registers and flags.
+     */
+    CPUState getCPUStateForDebug() const;
+
 private:
     // --- Private Members ---
     Emulator* m_model;

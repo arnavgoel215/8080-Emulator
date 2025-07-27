@@ -40,23 +40,26 @@ void Controller::onLoadROM(const std::string& romFilePath)
     m_isRunning = false;
     m_model->loadROM(romFilePath);
     m_model->reset();
-    // The view should have a method to show status messages.
-    // m_view->showStatusMessage("ROM loaded successfully. Press Start.");
+    if (m_view) {
+        // m_view->showStatusMessage("ROM loaded successfully. Press Start.");
+    }
 }
 
 void Controller::onToggleRun()
 {
     m_isRunning = !m_isRunning;
-    // The view should have a method to show status messages.
-    // m_view->showStatusMessage(m_isRunning ? "Emulation running." : "Emulation paused.");
+    if (m_view) {
+        // m_view->showStatusMessage(m_isRunning ? "Emulation running." : "Emulation paused.");
+    }
 }
 
 void Controller::onReset()
 {
     m_isRunning = false;
     m_model->reset();
-    // The view should have a method to show status messages.
-    // m_view->showStatusMessage("Emulator reset.");
+    if (m_view) {
+        // m_view->showStatusMessage("Emulator reset.");
+    }
 }
 
 void Controller::onKeyEvent(int key, bool isPressed)
@@ -112,15 +115,32 @@ void Controller::runFrame()
     // Trigger the V-Blank interrupt (RST 2). This signals the end of a frame.
     m_model->requestInterrupt(2);
 
-    // The model should provide a pointer to its internal framebuffer.
-    const uint8_t* frameBuffer = m_model->getFrameBuffer();
-    if (frameBuffer)
-    {
-        // The view should have a method to take the raw framebuffer data and render it.
-        // m_view->updateGraphics(frameBuffer, VRAM_SIZE);
-    }
+    if (m_view) {
+        // The model should provide a pointer to its internal framebuffer.
+        const uint8_t* frameBuffer = m_model->getFrameBuffer();
+        if (frameBuffer)
+        {
+            // The view should have a method to take the raw framebuffer data and render it.
+            // m_view->updateGraphics(frameBuffer, VRAM_SIZE);
+        }
 
-    // The view could also have a method to display debug info.
-    // CPUState state = m_model->getCPUState();
-    // m_view->updateDebugInfo(state);
+        // The view could also have a method to display debug info.
+        // CPUState state = m_model->getCPUState();
+        // m_view->updateDebugInfo(state);
+    }
+}
+
+// --- CLI / Debug Methods ---
+
+void Controller::stepSingleInstruction()
+{
+    // Emulate just enough cycles to hopefully execute one instruction.
+    // The exact number of cycles per instruction varies, but the emulator
+    // core handles that. We just need to advance it.
+    m_model->emulateCycles(1);
+}
+
+CPUState Controller::getCPUStateForDebug() const
+{
+    return m_model->getCPUState();
 }
