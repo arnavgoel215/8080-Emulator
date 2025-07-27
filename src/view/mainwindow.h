@@ -21,6 +21,7 @@
 #include <QPainter>
 #include <QImage>
 #include <QElapsedTimer>
+#include <QKeyEvent>
 
 /***************** Namespaces. ***********************/
 QT_BEGIN_NAMESPACE
@@ -41,7 +42,7 @@ class MainWindow : public QMainWindow
 
 public:
 
-    /***************** Private Class Functions. ***********************/
+    /***************** Public Class Functions. ***********************/
     
     /**
      * @brief Default constructor for QWidget.
@@ -50,6 +51,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     
+    /***************** Override Event Handlers. ***********************/
+
     /**
      * @brief Paint Window override event
      * Called when updates to the main window
@@ -59,6 +62,41 @@ public:
      * @param event Paint Event data.
      */
     void paintEvent(QPaintEvent *event) override;
+
+    /**
+     * @brief Override event for key press event.
+     * 
+     * Any keyboard key press.
+     * 
+     * @param QKeyEvent event info.
+     */
+    void keyPressEvent(QKeyEvent *event) override;
+
+    /**
+     * @brief Override event for key release event.
+     * 
+     * Any keyboard key release.
+     * 
+     * @param QKeyEvent event info.
+     */
+    void keyReleaseEvent(QKeyEvent *event) override;
+
+public slots:
+
+    /***************** Public Slot Functions. ***********************/
+
+    /**
+     * @brief Slot for receiving frame buffers.
+     *
+     * Custom slot used as an open interface to receive
+     * new video frame buffers.
+     *
+     * This slot is open ended, so that it can be signaled
+     * by a testing application, or the real emulation class.
+     *
+     * @param buffer Video buffer for single frame.
+     */
+    void on_frameBufferReceived(const frame_buffer_t *buffer);
 
 private slots:
 
@@ -125,19 +163,18 @@ private slots:
      */
     void on_actionRun_Video_Test_triggered();
 
-    /**
-     * @brief Slot for receiving frame buffers.
-     * 
-     * Custom slot used as an open interface to receive
-     * new video frame buffers.
-     * 
-     * This slot is open ended, so that it can be signaled
-     * by a testing application, or the real emulation class.
-     * 
-     * @param buffer Video buffer for single frame.
-     */
-    void on_frameBufferReceived(const frame_buffer_t *buffer);
 
+signals:
+    /***************** Public Signals. ***********************/
+
+    /**
+     * @brief External key signal.
+     * 
+     * Used to send key events to external object. This signal
+     * must be connected with the controller module to
+     * receive any incoming key events.
+     */
+    void sendKeySignal(int key, bool isPressed);
 
 private:
 
