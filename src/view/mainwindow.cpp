@@ -18,6 +18,9 @@
 
 // Qt tools includes.
 #include <QDebug>
+#include <QFileDialog> // For loading ROM path.
+#include <QMessageBox> // For displaying failed attempt to load ROM.
+#include <QTimer> // For single shot 'C' key presses.
 
 /***************** Macros and defines. ***********************/
 
@@ -102,17 +105,45 @@ void MainWindow::on_actionClose_ROM_triggered()
 
 void MainWindow::on_action_Re_Start_Game_triggered()
 {
-    // TODO.
+    // Reset emulator.
+    emit sendResetSignal();
 }
 
 void MainWindow::on_actionPause_Game_triggered()
 {
-    // TODO.
+    // Toggle pause.
+    emit sendToggleRunSignal();
 }
 
 void MainWindow::on_actionInsert_Coin_triggered()
 {
-    // TODO.
+    // Emulate a press of the 'C' key for 300 ms.
+    // We use 300 ms just to simulate a normal key pulse.
+    // NOTE: It might not be the most optimal to hardcode the 'C' press.
+    // In the future it might be better to abstract all the game
+    // actions before sending them to the controller.
+
+    QTimer *releaseKeyTimer = new QTimer;
+    releaseKeyTimer->setSingleShot(true);
+    releaseKeyTimer->setInterval(300); // 300 ms.
+
+    // Set key state first.
+    emit sendKeySignal(Qt::Key_C, true);
+
+    // Temporarily disable option.
+    ui->actionInsert_Coin->setDisabled(true);
+
+    // Call up single shot timer to release key 300 ms later.
+    connect(releaseKeyTimer, &QTimer::timeout, this, [=](){
+        emit sendKeySignal(Qt::Key_C, false);
+
+        // Reenable menu option.
+        ui->actionInsert_Coin->setDisabled(false);
+
+        // Deallocate timer.
+        delete releaseKeyTimer;
+    });
+    releaseKeyTimer->start();
 }
 
 void MainWindow::on_actionRun_Video_Test_triggered()
@@ -231,16 +262,48 @@ void MainWindow::on_frameBufferReceived(const frame_buffer_t *buffer)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    // Block any key events until game is fully loaded.
+    if (false == romIsLoaded)
+    {
+        return;
+    }
+
     // Avoid repeated events when holding the input.
     if (false == event->isAutoRepeat())
     {
-        emit sendKeySignal(event->key(), true);
+        // Catch UI shortcuts.
+        switch(event->key())
+        {
+            // Pause Game.
+            case Qt::Key_P:
+            {
+                emit sendToggleRunSignal();
+                break;
+            }
+            // (Re)Start Game.
+            case Qt::Key_R:
+            {
+                emit sendResetSignal();
+            }
+            // Any other keys are redirected to controller.
+            default:
+            {
+                emit sendKeySignal(event->key(), true);
+            }
+        }
+
         qDebug() << event->text() << "has been pressed";
     }
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
+    // Block any key events until game is fully loaded.
+    if (false == romIsLoaded)
+    {
+        return;
+    }
+
     // Avoid repeated events when holding the input.
     if (false == event->isAutoRepeat())
     {
