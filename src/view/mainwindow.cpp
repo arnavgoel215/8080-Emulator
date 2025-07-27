@@ -159,7 +159,6 @@ void MainWindow::on_actionRun_Video_Test_triggered()
 
         // Disable all the game options.
         ui->menuFile->setDisabled(true);
-        ui->menuGame->setDisabled(true);
 
         this->setWindowTitle("Space Invaders (Test Video Mode)");
 
@@ -181,7 +180,6 @@ void MainWindow::on_actionRun_Video_Test_triggered()
 
         // Enable back all the game options.
         ui->menuFile->setDisabled(false);
-        ui->menuGame->setDisabled(false);
 
         // Restor window title.
         this->setWindowTitle("Space Invaders");
