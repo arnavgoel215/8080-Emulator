@@ -845,7 +845,10 @@ void Emulator::op_CMP(uint8_t val)
 // 0xC3: JMP addr
 void Emulator::op_JMP()
 {
-    state.pc = (memory.ReadByte(state.sp + 1) << 8) | memory.ReadByte(state.sp);
+    // The 16-bit address is at PC+1 and PC+2
+    uint8_t low_byte = memory.ReadByte(state.pc + 1);
+    uint8_t high_byte = memory.ReadByte(state.pc + 2);
+    state.pc = (high_byte << 8) | low_byte;
 }
 // 0xC9: RET
 void Emulator::op_RET()
