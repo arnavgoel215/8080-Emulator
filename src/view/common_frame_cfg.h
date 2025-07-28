@@ -13,7 +13,7 @@
 /***************** Include files. ***********************/
 
 // Standard includes.
-#include <vector>
+#include <array>
 #include <cstdint>
 
 /***************** Macros, constants, and defines. ***********************/

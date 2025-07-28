@@ -105,8 +105,10 @@ public:
     /**
      * @brief Loads a ROM file's contents into the emulator's memory.
      * @param romFilePath The path to the ROM file.
+     * 
+     * @returns true if path is valid, and ROM was successfully read.
      */
-    void loadROM(const std::string& romFilePath);
+    bool loadROM(const std::string& romFilePath);
 
     /**
      * @brief Resets the emulator to its initial power-on state.

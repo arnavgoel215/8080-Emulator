@@ -164,6 +164,18 @@ private slots:
     void on_actionRun_Video_Test_triggered();
 
 
+    /**
+     * @brief Slot for Closing the ROM.
+     * 
+     * This slot is called from the menu bar
+     * option 'Close ROM', under the File parent
+     * menu.
+     * 
+     * This will in turn call the controller module
+     * to clear out the ROM and reset the emulator.
+     */
+    void on_actionClose_ROM_triggered();
+
 signals:
     /***************** Public Signals. ***********************/
 
@@ -173,8 +185,44 @@ signals:
      * Used to send key events to external object. This signal
      * must be connected with the controller module to
      * receive any incoming key events.
+     * 
+     * @param key Key integer enumeration.
+     * @param isPreessed true for pressed state, else false.
      */
     void sendKeySignal(int key, bool isPressed);
+
+    /**
+     * @brief Send the path for the ROM files.
+     * 
+     * After the ROM file path is selected in the GUI, this
+     * signal sends the path string to the controller module.
+     * 
+     * @param romFilePath ROM path string.
+     * @param[out] isValidRomPath The receiver of the signal writes
+     *                            true if the path is valid, and
+     *                            the ROM was loaded successfully.
+     */
+    void sendRomPath(const std::string& romFilePath, bool *isValidRomPath);
+
+    /**
+     * @brief Send Pause/Run toggle signal.
+     */
+    void sendToggleRunSignal(void);
+
+    /**
+     * @brief Send Reset signal.
+     * 
+     * Reset reinitializes the game and reloads the game
+     * from a clean state.
+     */
+    void sendResetSignal(void);
+
+    /**
+     * @brief Send Close signal.
+     * 
+     * Unloads the ROM from memory, and resets the emulator state.
+     */
+    void sendCloseGameSignal(void);
 
 private:
 
@@ -235,5 +283,13 @@ private:
      * Used to display the FPS calculation in the qDebug terminal.
      */
     QElapsedTimer fpsTimer;
+
+    /**
+     * @brief Auxiliary flag to set if ROM is succesfully loaded.
+     * 
+     * The flag is used to either enable and disable the game menu options,
+     * and block key events when the game is not active.
+     */
+    bool romIsLoaded = false;
 };
 #endif // MAINWINDOW_H
