@@ -1046,8 +1046,10 @@ void Emulator::op_OUT()
 // ====================== Opcode: Stack ==========================
 
 // ====================== Opcode: RST =============================
-// (0)0xC7 = 0x0 | (1)0xCF = 0x08 | (2)0xD7 = 0x10 | (3)0xDF = 0x18 
-// (4)0xE7 = 0x20 | (5)0xEF = 0x28 | (6)0x F7 = 0x30 | (7)0xFF = 0x38 
+// Opcode      : (0)0xC7 = 0x0 | (1)0xCF = 0x08 | (2)0xD7 = 0x10 
+// (3)0xDF = 0x18 | (4)0xE7 = 0x20 | (5)0xEF = 0x28 | (6)0x F7 = 0x30 
+// (7)0xFF = 0x38 
+// Mnemonic    : RST
 // Simulates a restart instruction by pushing the return address 
 // (PC + 1) onto the stack and jumping to a hardcoded address n * 8
 // n - The restart number (0 to 7), corresponding to address 0x00 to 0x38

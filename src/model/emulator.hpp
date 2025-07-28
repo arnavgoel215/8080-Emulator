@@ -372,7 +372,7 @@ private:
     /** @brief Handles RST 0-7 Opcodes */
     void op_RST(int index);
     /** @brief  Handles Opcode 0xF9 */
-        void op_SPHL();  // SP ← HL
+    void op_SPHL();  // SP ← HL
 
 
 };
