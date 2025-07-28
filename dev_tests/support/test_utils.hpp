@@ -71,7 +71,7 @@ inline void printTestResult(const std::string& tag,
               << description << ": "
               << (passed ? (GREEN + "[PASS]" + RESET)
                          : (RED + "[FAIL]" + RESET))
-              << "\n";
+              << "\n\n";
 }
 
 // ======================== Simple Debug Snapshot ============================
@@ -158,6 +158,63 @@ inline CPUState runInstructionWithMemory(const std::vector<uint8_t>& opcode,
 
 // ============ Debug Print Utilities ========================================
 
+// ======================= CPU Arithmetic: Print Helper ======================
+// Print detailed debug output for arithmetic operations
+// Displays actual vs expected result, flags (Z, S, P, AC, CY), and carry info
+// Useful for debugging mismatched arithmetic behavior and emulator logic
+void printArithmeticDebug(
+    const std::string& name,
+    uint8_t lhs,
+    uint8_t rhs,
+    bool useCarry,
+    uint8_t actualResult,
+    const Flags& flags,
+    uint8_t expectedResult,
+    bool expectedCarry)
+{
+    std::cout << "[DEBUG: " << name << "]\n";
+    std::cout << "  LHS           = 0x" << std::hex << (int)lhs << "\n";
+    std::cout << "  RHS           = 0x" << std::hex << (int)rhs << "\n";
+    std::cout << "  Use Carry     = " << (useCarry ? "true" : "false") << "\n";
+    std::cout << "  Actual Result = 0x" << std::hex << (int)actualResult << "\n";
+    std::cout << "  Expected      = 0x" << std::hex << (int)expectedResult << "\n";
+    std::cout << "  Carry         = " << (int)flags.cy << " (expected: " << expectedCarry << ")\n";
+    std::cout << "  Flags         = Z:" << (int)flags.z
+              << " S:" << (int)flags.s
+              << " P:" << (int)flags.p
+              << " AC:" << (int)flags.ac
+              << " CY:" << (int)flags.cy << "\n";
+}
+
+// ======================= CPU Logic: Print Helper ======================
+// Print detailed debug output for logical operations and comparisons
+// Reports flag correctness per bit and highlights mismatches 
+// Ideal for verifying bitwise ops and flag-setting logic
+void printLogicDebug(
+    const std::string& name,
+    uint8_t lhs,
+    uint8_t rhs,
+    uint8_t actualResult,
+    const Flags& flags,
+    uint8_t expectedResult,
+    bool expectedZ,
+    bool expectedS,
+    bool expectedP,
+    bool expectedCY,
+    bool expectedAC)
+{
+    std::cout << "[DEBUG: " << name << "]\n";
+    std::cout << "  LHS           = 0x" << std::hex << (int)lhs << "\n";
+    std::cout << "  RHS           = 0x" << std::hex << (int)rhs << "\n";
+    std::cout << "  Actual Result = 0x" << std::hex << (int)actualResult
+              << " (expected: 0x" << (int)expectedResult << ")\n";
+    std::cout << "  Flags         = Z:" << (int)flags.z << " (exp:" << expectedZ << ")"
+              << " S:" << (int)flags.s << " (exp:" << expectedS << ")"
+              << " P:" << (int)flags.p << " (exp:" << expectedP << ")"
+              << " CY:" << (int)flags.cy << " (exp:" << expectedCY << ")"
+              << " AC:" << (int)flags.ac << " (exp:" << expectedAC << ")\n";
+}
+
 // ===================== Stack Debug Helper ==================================
 // Outputs detailed stack debug information in a human-readable format:
 // opcode value, initial/final SP, register and memory pair values,
@@ -194,6 +251,7 @@ inline void printStackDebug(
 #endif
 }
 
+// ============================= CPU Stack: POP Debug Printer ===============================
 // Prints detailed debug output for POP instructions.
 // Verifies that the values popped from the stack match the expected register pair.
 inline void printPopDebug(const std::string& label,

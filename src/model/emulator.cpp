@@ -227,15 +227,15 @@ void Emulator::executeInstruction()
         case 0xE0: op_RET_cond(!state.flags.p); break;  // RPO
         case 0xE2: op_JMP_cond(!state.flags.p); break;  // JPO addr
         case 0xE4: op_CALL_cond(!state.flags.p); break;  // CPO addr
-        case 0xE6: op_ANA(memory.ReadByte(state.pc++)); break; // ANI d8
+        case 0xE6: op_ANA(memory.ReadByte(state.pc + 1)); break; // ANI d8
         case 0xE8: op_RET_cond(state.flags.p); break;  // RPE
         case 0xEA: op_JMP_cond(state.flags.p); break;  // JPE addr
         case 0xEC: op_CALL_cond(state.flags.p); break;  // CPE addr
-        case 0xEE: op_XRA(memory.ReadByte(state.pc++)); break; // XRI d8
+        case 0xEE: op_XRA(memory.ReadByte(state.pc + 1)); break; // XRI d8
         case 0xF0: op_RET_cond(!state.flags.s); break;  // RP
         case 0xF2: op_JMP_cond(!state.flags.s); break;  // JP addr
         case 0xF4: op_CALL_cond(!state.flags.s); break;  // CP addr
-        case 0xF6: op_ORA(memory.ReadByte(state.pc++)); break; // ORI d8
+        case 0xF6: op_ORA(memory.ReadByte(state.pc + 1)); state.pc += 2; break; // ORI d8
         case 0xC7: op_RST(0); break;  // RST 0 | Call address 0x00
         case 0xCF: op_RST(1); break;  // RST 1 | Call address 0x08
         case 0xD7: op_RST(2); break;  // RST 2 | Call address 0x10
@@ -248,7 +248,7 @@ void Emulator::executeInstruction()
         case 0xF8: op_RET_cond(state.flags.s); break;  // RM
         case 0xFA: op_JMP_cond(state.flags.s); break;  // JM addr
         case 0xFC: op_CALL_cond(state.flags.s); break;  // CM addr
-        case 0xFE: op_CMP(memory.ReadByte(state.pc++)); break;  // CPI d8
+        case 0xFE: op_CMP(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // CPI d8
         case 0xD3: op_OUT(); break;  // OUT d8
         case 0xDB: op_IN(); break;  // IN d8
 
@@ -806,12 +806,27 @@ void Emulator::op_CMC()
     state.flags.cy = !state.flags.cy;
     state.pc += 1;
 }
-// A0 to A7 ANA
+
+// =========================== Opcode: ANA r/M ============================
+// Opcode Range : 0xA0–0xA7 (register) | 0xE6 (immediate)
+// Mnemonic     : ANA r / ANA M / ANI d8
+//
+// Performs a logical AND between the accumulator (A) and the given operand.
+// The result is stored back into A. |  A ← A & operand
+//
+// Flag Behavior:
+// - Z (Zero):    Set if result is 0 |  S (Sign):    Set if bit 7 of result is 1
+// - P (Parity):  Set if result has even parity | CY (Carry):  Always cleared to 0
+// - AC (Aux Carry): Set if bit 3 of A or operand is set (A[3] | operand[3])
+//
+// Usage Notes:
+// - No effect on PC other than in the calling opcode handler.
+// - Immediate variant (ANI d8) must handle PC += 2 externally.
 void Emulator::op_ANA(uint8_t val)
 {
-    state.a = state.a & val;  // AND operation
+    state.flags.ac = ((state.a | val) & 0x08) != 0;  
+    state.a = state.a & val;
     state.flags.cy = 0;
-    state.flags.ac = 1;  // AC flag is always set to 1 during ANA instruction
     setFlags(state.a);
 }
 // A8 to AF XRA
@@ -840,8 +855,7 @@ void Emulator::op_CMP(uint8_t val)
     uint16_t result = *a - val;
     *cy = (*a < val);
     *ac = ((*a & 0x0F) < (val & 0x0F));
-
-    setFlags(result & 0xFF);
+    setFlags(result);
 }
 
 // Branch Group
@@ -1115,8 +1129,9 @@ void Emulator::setFlags(uint8_t result)
     // Flags Z, S and P get set based on final result of operation
     state.flags.z = (result == 0);
     state.flags.s = (result & 0x80);
-    state.flags.p = __builtin_parity(result);
+    state.flags.p = !__builtin_parity(result);
 }
+
 
 uint16_t Emulator::hl() const
 {
