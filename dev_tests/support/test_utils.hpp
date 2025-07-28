@@ -162,6 +162,8 @@ inline CPUState runInstructionWithMemory(const std::vector<uint8_t>& opcode,
 // Print detailed debug output for arithmetic operations
 // Displays actual vs expected result, flags (Z, S, P, AC, CY), and carry info
 // Useful for debugging mismatched arithmetic behavior and emulator logic
+#include <optional>
+
 void printArithmeticDebug(
     const std::string& name,
     uint8_t lhs,
@@ -170,7 +172,11 @@ void printArithmeticDebug(
     uint8_t actualResult,
     const Flags& flags,
     uint8_t expectedResult,
-    bool expectedCarry)
+    bool expectedCarry,
+    std::optional<bool> expectedZ = std::nullopt,
+    std::optional<bool> expectedS = std::nullopt,
+    std::optional<bool> expectedP = std::nullopt,
+    std::optional<bool> expectedAC = std::nullopt)
 {
     std::cout << "[DEBUG: " << name << "]\n";
     std::cout << "  LHS           = 0x" << std::hex << (int)lhs << "\n";
@@ -184,7 +190,18 @@ void printArithmeticDebug(
               << " P:" << (int)flags.p
               << " AC:" << (int)flags.ac
               << " CY:" << (int)flags.cy << "\n";
+
+    // Optional expected flags (if provided)
+    if (expectedZ.has_value())
+        std::cout << "  Expected Z    = " << expectedZ.value() << "\n";
+    if (expectedS.has_value())
+        std::cout << "  Expected S    = " << expectedS.value() << "\n";
+    if (expectedP.has_value())
+        std::cout << "  Expected P    = " << expectedP.value() << "\n";
+    if (expectedAC.has_value())
+        std::cout << "  Expected AC   = " << expectedAC.value() << "\n";
 }
+
 
 // ======================= CPU Logic: Print Helper ======================
 // Print detailed debug output for logical operations and comparisons

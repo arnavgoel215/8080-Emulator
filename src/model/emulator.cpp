@@ -211,19 +211,19 @@ void Emulator::executeInstruction()
         case 0xC0: op_RET_cond(!state.flags.z); break;  // RNZ
         case 0xC2: op_JMP_cond(!state.flags.z); break;  // JNZ addr
         case 0xC4: op_CALL_cond(!state.flags.z); break;  // CNZ addr
-        case 0xC6: op_ADD(memory.ReadByte(state.pc++)); break;  // ADI d8
+        case 0xC6: op_ADI(memory.ReadByte(state.pc + 1)); break;  // ADI d8
         case 0xC8: op_RET_cond(state.flags.z); break;  // RZ
         case 0xCA: op_JMP_cond(state.flags.z); break;  // JZ addr
         case 0xCC: op_CALL_cond(state.flags.z); break; // CZ addr
-        case 0xCE: op_ADD(memory.ReadByte(state.pc++)); break;  // ACI d8
+        case 0xCE: op_ACI(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // ACI d8
         case 0xD0: op_RET_cond(!state.flags.cy); break;  // RNC
         case 0xD2: op_JMP_cond(!state.flags.cy); break;  // JNC addr
         case 0xD4: op_CALL_cond(!state.flags.cy); break;  // CNC addr
-        case 0xD6: op_SUB(memory.ReadByte(state.pc++)); break;  // SUI d8
+        case 0xD6: op_SUI(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // SUI d8
+        case 0xDE: op_SBI(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // SBI d8
         case 0xD8: op_RET_cond(state.flags.cy); break;  // RC
         case 0xDA: op_RET_cond(state.flags.cy); break;  // JC addr
         case 0xDC: op_CALL_cond(state.flags.cy); break;  // CC addr
-        case 0xDE: op_SBB(memory.ReadByte(state.pc++)); break;  // SBI d8
         case 0xE0: op_RET_cond(!state.flags.p); break;  // RPO
         case 0xE2: op_JMP_cond(!state.flags.p); break;  // JPO addr
         case 0xE4: op_CALL_cond(!state.flags.p); break;  // CPO addr
@@ -703,6 +703,88 @@ void Emulator::op_DCR_A()
     state.a = result;
     state.pc += 1;
 }
+
+// =========================== Opcode: ADI d8 ================================
+// Opcode      : 0xC6
+// Mnemonic    : ADI d8
+//
+// Adds the immediate 8-bit value (d8) to the accumulator A.
+// A ← A + d8
+// Affects all flags: Z, S, P, CY, AC
+void Emulator::op_ADI(uint8_t val)
+{
+    uint8_t originalA = state.a;
+    uint16_t result = static_cast<uint16_t>(state.a) + val;
+
+    state.flags.cy = result > 0xFF;
+    state.flags.ac = ((originalA & 0x0F) + (val & 0x0F)) > 0x0F;
+
+    state.a = static_cast<uint8_t>(result);
+    setFlags(state.a);
+
+    // Advance PC by 2 (1 for opcode, 1 for immediate byte)
+    state.pc += 2;
+}
+// =========================== Opcode: SUI d8 ================================
+// Opcode      : 0xD6
+// Mnemonic    : SUI d8
+//
+// Subtract immediate 8-bit value from A.
+// A ← A - d8
+// Affects all flags: Z, S, P, CY, AC
+void Emulator::op_SUI(uint8_t val) {
+    uint8_t originalA = state.a;
+    uint16_t result = static_cast<uint16_t>(state.a) - val;
+
+    state.flags.cy = (val > originalA);
+    state.flags.ac = ((originalA & 0x0F) < (val & 0x0F));
+
+    state.a = static_cast<uint8_t>(result);
+    setFlags(state.a);
+}
+
+// =========================== Opcode: SBI d8 ================================
+// Opcode      : 0xDE
+// Mnemonic    : SBI d8
+//
+// Subtract immediate 8-bit value and borrow (CY) from A.
+// A ← A - d8 - CY
+// Affects all flags: Z, S, P, CY, AC
+void Emulator::op_SBI(uint8_t val) {
+    uint8_t originalA = state.a;
+    uint8_t borrow = state.flags.cy ? 1 : 0;
+    uint16_t result = static_cast<uint16_t>(state.a) - val - borrow;
+
+    state.flags.cy = (val + borrow > originalA);
+    state.flags.ac = ((originalA & 0x0F) < ((val & 0x0F) + borrow));
+
+    state.a = static_cast<uint8_t>(result);
+    setFlags(state.a);
+}
+
+// =========================== Opcode: ACI d8 ================================
+// Opcode      : 0xCE
+// Mnemonic    : ACI d8
+//
+// Adds immediate 8-bit value and Carry flag to accumulator A.
+// A ← A + d8 + CY
+// Affects all flags: Z, S, P, CY, AC
+void Emulator::op_ACI(uint8_t val) {
+    uint8_t originalA = state.a;
+    uint8_t carryIn = state.flags.cy ? 1 : 0;
+
+    uint16_t result = static_cast<uint16_t>(state.a) + val + carryIn;
+
+    // Calculate AC before modifying flags
+    state.flags.ac = ((originalA & 0x0F) + (val & 0x0F) + carryIn) > 0x0F;
+    state.flags.cy = result > 0xFF;
+
+    state.a = static_cast<uint8_t>(result);
+    setFlags(state.a);
+}
+
+
+
 // 80 to 87: ADD
 void Emulator::op_ADD(uint8_t val)
 {
@@ -718,6 +800,7 @@ void Emulator::op_ADD(uint8_t val)
 
     setFlags(*a);
 }
+
 // 88 to 8F: ADC
 void Emulator::op_ADC(uint8_t val)
 {

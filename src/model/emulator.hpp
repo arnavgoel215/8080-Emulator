@@ -373,6 +373,15 @@ private:
     void op_RST(int index);
     /** @brief  Handles Opcode 0xF9 */
     void op_SPHL();  // SP ← HL
+    /** @brief Handles Opcode 0xC6 (ADI) */
+    void op_ADI(uint8_t immediateVal); // ADI d8
+    /** @brief Handles Opcode 0xCE (ACI) */
+    void op_ACI(uint8_t immediateVal); // ACI d8
+    /** @brief Hanldes Opcode 0xD6 */
+    void op_SUI(uint8_t val); // SUI d8
+    /** @brief Handles Opcode 0xDE */
+    void op_SBI(uint8_t val); // SBI d8
+
 
 
 };
