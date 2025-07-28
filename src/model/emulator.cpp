@@ -74,6 +74,7 @@ void Emulator::executeInstruction()
         RegisterCode dst = (RegisterCode)((opcode >> 3) & 0x07);  // Determines which register to set
         RegisterCode src = (RegisterCode)(opcode & 0x07);  // Determines which register to get value from
         set_reg(dst, get_reg(src));
+        state.pc += 1;
         return;
     }
 
@@ -1128,7 +1129,7 @@ void Emulator::set_reg(uint8_t code, uint8_t val)
         case REG_E: state.e = val; break;
         case REG_H: state.h = val; break;
         case REG_L: state.l = val; break;
-        case REG_M: memory.WriteByte(hl(), val);
+        case REG_M: memory.WriteByte(hl(), val); break;
         case REG_A: state.a = val; break;
     }
 }
