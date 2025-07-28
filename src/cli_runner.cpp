@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
     // We pass nullptr for the view because we are not using the GUI.
     Controller controller(&model, nullptr);
 
-    std::string rom_path = "rom/invaders.rom";
+    std::string rom_path = "rom/";
     if (argc > 1) {
         rom_path = argv[1];
     }
