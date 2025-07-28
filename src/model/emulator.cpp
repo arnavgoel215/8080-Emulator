@@ -236,6 +236,15 @@ void Emulator::executeInstruction()
         case 0xF2: op_JMP_cond(!state.flags.s); break;  // JP addr
         case 0xF4: op_CALL_cond(!state.flags.s); break;  // CP addr
         case 0xF6: op_ORA(memory.ReadByte(state.pc++)); break; // ORI d8
+        case 0xC7: op_RST(0); break;  // RST 0 | Call address 0x00
+        case 0xCF: op_RST(1); break;  // RST 1 | Call address 0x08
+        case 0xD7: op_RST(2); break;  // RST 2 | Call address 0x10
+        case 0xDF: op_RST(3); break;  // RST 3 | Call address 0x18
+        case 0xE7: op_RST(4); break;  // RST 4 | Call address 0x20
+        case 0xEF: op_RST(5); break;  // RST 5 | Call address 0x28
+        case 0xF7: op_RST(6); break;  // RST 6 | Call address 0x30
+        case 0xFF: op_RST(7); break;  // RST 7 | Call address 0x38
+        case 0xF9: op_SPHL(); break;  // SPHL: SP ← HL
         case 0xF8: op_RET_cond(state.flags.s); break;  // RM
         case 0xFA: op_JMP_cond(state.flags.s); break;  // JM addr
         case 0xFC: op_CALL_cond(state.flags.s); break;  // CM addr
@@ -942,23 +951,55 @@ void Emulator::op_POP_H()
     state.sp += 2;
     state.pc += 1;
 }
-// 0xE3: XTHL
-void Emulator::op_XTHL()
-{
+
+// =========================== Opcode: XTHL ================================
+// Opcode      : 0xE3
+// Mnemonic    : XTHL
+// 
+// Exchange the contents of register pair HL with the word at
+// the top of the stack (i.e., memory at address SP and SP+1).
+// L <-> [SP] | H <-> [SP+1]
+// This is a direct, in-place swap with no flags affected.
+void Emulator::op_XTHL() {
+    // Save stack contents before overwriting
     uint8_t temp_l = memory.ReadByte(state.sp);       
     uint8_t temp_h = memory.ReadByte(state.sp + 1);   
+
+    // Write HL into stack
     memory.WriteByte(state.sp,     state.l);          
     memory.WriteByte(state.sp + 1, state.h);
+
+    // Load original stack contents into HL
+    state.l = temp_l;
+    state.h = temp_h;
+
+    // Advance PC
     state.pc += 1;
 }
-// 0xE5: PUSH H
-void Emulator::op_PUSH_H()
-{
-    memory.WriteByte(state.sp - 1, state.h);    
-    memory.WriteByte(state.sp - 2, state.l); 
+
+
+// ========================== Opcode: PUSH H ================================
+// Opcode      : 0xE5
+// Mnemonic    : PUSH H
+// Push the contents of register pair HL onto the stack.
+// Stack grows downward, so SP is decremented by 2 before writing.
+// L is written to SP, H to SP+1. Program counter is advanced.
+//
+// Stack Effect: SP = SP - 2 || [SP]   = L || [SP+1] = H
+
+void Emulator::op_PUSH_H() {
+    // Decrement SP before writing
     state.sp -= 2;
+
+    // Write HL into stack (low at SP, high at SP+1)
+    memory.WriteByte(state.sp,     state.l);  
+    memory.WriteByte(state.sp + 1, state.h);
+
+    // Advance program counter
     state.pc += 1;
 }
+
+
 // 0xF1: POP PSW
 void Emulator::op_POP_PSW()
 {
@@ -1001,6 +1042,41 @@ void Emulator::op_OUT()
     uint8_t port = memory.ReadByte(state.pc++); 
     state.a = io_write(port, state.a);
 }
+
+// ====================== Opcode: Stack ==========================
+
+// ====================== Opcode: RST =============================
+// (0)0xC7 = 0x0 | (1)0xCF = 0x08 | (2)0xD7 = 0x10 | (3)0xDF = 0x18 
+// (4)0xE7 = 0x20 | (5)0xEF = 0x28 | (6)0x F7 = 0x30 | (7)0xFF = 0x38 
+// Simulates a restart instruction by pushing the return address 
+// (PC + 1) onto the stack and jumping to a hardcoded address n * 8
+// n - The restart number (0 to 7), corresponding to address 0x00 to 0x38
+// SP is decremented by 2, and the return address is stored on stack.
+// Return address is the instruction following the RST call
+void Emulator::op_RST(int n) {
+    uint16_t returnAddr = state.pc + 1;  
+    state.sp -= 1;
+    memory.WriteByte(state.sp, (returnAddr >> 8) & 0xFF);
+    state.sp -= 1;
+    memory.WriteByte(state.sp, returnAddr & 0xFF);
+    state.pc = n * 8;
+}
+
+// ====================== Opcode: SPHL (0xF9) ==========================
+// Simulates the SPHL instruction (Opcode 0xF9)
+// SPHL copies the contents of the HL register pair into the Stack Pointer (SP).
+// No flags are affected. HL remains unchanged.
+// This is typically used to transfer a calculated memory address into SP
+// for stack operations or function calls.
+// 
+// SP ← HL
+void Emulator::op_SPHL() {
+    state.sp = (static_cast<uint16_t>(state.h) << 8) | state.l;
+}
+
+
+
+
 
 void Emulator::requestInterrupt(uint8_t interrupt_num)
 {

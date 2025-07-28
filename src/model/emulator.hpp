@@ -369,6 +369,12 @@ private:
     void op_OUT();
     /** @brief Executes MOV instruction */
     void op_MOV(uint8_t opcode);
+    /** @brief Handles RST 0-7 Opcodes */
+    void op_RST(int index);
+    /** @brief  Handles Opcode 0xF9 */
+        void op_SPHL();  // SP ← HL
+
+
 };
 
 #endif /* EMULATOR_HPP_ */
