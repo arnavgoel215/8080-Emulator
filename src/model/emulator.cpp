@@ -726,6 +726,7 @@ void Emulator::op_ADD(uint8_t val)
     *a = result & 0xFF;  // Ensures that new value fits within 8-bits
 
     setFlags(*a);
+    state.pc += 1;
 }
 // 88 to 8F: ADC
 void Emulator::op_ADC(uint8_t val)
@@ -741,6 +742,7 @@ void Emulator::op_ADC(uint8_t val)
     *a = result & 0xFF;  // Ensures that new value fits within 8-bits
 
     setFlags(*a);
+    state.pc += 1;
 }
 // 90 to 97 SUB
 void Emulator::op_SUB(uint8_t val) 
@@ -756,6 +758,7 @@ void Emulator::op_SUB(uint8_t val)
     *a = result & 0xFF;  // Ensures that new value fits within 8-bits
 
     setFlags(*a);
+    state.pc += 1;
 }
 // 98 to 9F SBB
 void Emulator::op_SBB(uint8_t val)
@@ -773,6 +776,7 @@ void Emulator::op_SBB(uint8_t val)
 
     *a = result & 0xFF;  // Ensures that new value fits within 8-bits
     setFlags(*a);
+    state.pc += 1;
 }
 // Logical Group
 // 0x07: RLC
@@ -822,6 +826,7 @@ void Emulator::op_ANA(uint8_t val)
     state.flags.cy = 0;
     state.flags.ac = 1;  // AC flag is always set to 1 during ANA instruction
     setFlags(state.a);
+    state.pc += 1;
 }
 // A8 to AF XRA
 void Emulator::op_XRA(uint8_t val)
@@ -830,6 +835,7 @@ void Emulator::op_XRA(uint8_t val)
     state.flags.cy = 0;
     state.flags.ac = 0;
     setFlags(state.a);
+    state.pc += 1;
 }
 // B0 to B7 ORA
 void Emulator::op_ORA(uint8_t val)
