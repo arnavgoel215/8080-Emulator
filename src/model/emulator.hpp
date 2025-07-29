@@ -5,7 +5,7 @@
  *        This class serves as the main facade for the Controller
  *        to interact with the CPU, memory, and I/O subsystems.
  * 
- * @author Arnav (CPU Core), Fredo (Memory/IO)
+ * @author Jese/Arnav (CPU Core), Fredo (Memory/IO), Sergio (Inputs)
  * 
  *********************************************************/
 #ifndef EMULATOR_HPP_
@@ -38,6 +38,72 @@ enum class GameInput
 };
 
 /**
+ * @brief Union used to easily write and read single
+ * bits in the input port 1.
+ */
+typedef union
+{
+    struct
+    {
+        uint8_t coin:1;            // Coin insertion on 1.
+        uint8_t p2_start:1;        // Player 2 Start button
+        uint8_t p1_start:1;        // Player 1 Start button
+        uint8_t bit_3_reserved:1;  // Reserved, always set to 1.
+        uint8_t p1_shoot:1;        // Player 1 shoot button.
+        uint8_t p1_left:1;         // Player 1 Left Joystick input.
+        uint8_t p1_right:1;        // Player 1 Right Joystic input.
+        uint8_t bit_7_reserved;    // Reserved.
+    };
+    uint8_t byte;
+} port1_t;
+
+/**
+ * @brief Union used to easily write and read single
+ * bits in the input port 1.
+ * 
+ * TODO: Controller interface not implemented. Everything
+ * is defaulted to 0.
+ */
+typedef union
+{
+    struct
+    {
+        uint8_t lives_dipswitch_0:1;
+        uint8_t lives_dipswitch_1:1;
+        uint8_t tilt_button:1;
+        uint8_t bonus_life_dipswitch:1;
+        uint8_t p2_shoot:1;
+        uint8_t p2_left:1;
+        uint8_t p2_right:1;
+        uint8_t coin_demo_dipswitch:1;
+    };
+    uint8_t byte;
+} port2_t;
+
+/**
+ * @brief Input port enumeration.
+ */
+enum class InPortNum : uint8_t
+{
+    INP0 = 0,    // Test inputs (Unused).
+    INP1 = 1,    // P1 Inputs, and Coin deposit.
+    INP2 = 2,    // P2 Inputs, and dipswitches.
+    SHFT_IN = 3, // Shift register result.
+};
+
+/**
+ * @brief Output port enumeration.
+ */
+enum class OutPortNum : uint8_t
+{
+    SHFTAMNT = 2,   // Shift amount, how many bits the shift register uses.
+    SOUND1 = 3,     // Sound chip 1. (TODO: Not implemented.)
+    SHFT_DATA = 4,  // Shift data, the actual data being shifted.
+    SOUND2 = 5,     // Sound chip 2 (TODO: Not implemented.)
+    WATCHDOG = 6,   // Watchdog controller (Unused by emulation).
+};
+
+/**
  * @brief A plain data structure to hold a snapshot of the CPU's state for debugging.
  */
 struct CPUState
@@ -58,9 +124,10 @@ struct CPUState
     bool interrupts_enabled;
 
     // I/O ports for Space Invaders hardware
-    uint8_t port_in_0 = 0b00001000; // Bit 3 is always 1
-    uint8_t port_in_1 = 0;
-    uint8_t port_in_2 = 0;
+    // Port 0 is unused.
+    port1_t port_in_1 = {};
+    port2_t port_in_2 = {};
+    // Port 3 is tied to the shift register.
 
     uint16_t shift_register = 0;
     uint8_t shift_offset = 0;
@@ -197,12 +264,12 @@ private:
     /**
      * @brief Handles input into the system
      */
-    uint8_t io_read(uint8_t port);
+    uint8_t io_read(InPortNum port);
 
     /**
      * @brief Handles output from the system
      */
-    uint8_t io_write(uint8_t port, uint8_t val);
+    void io_write(OutPortNum port, uint8_t val);
 
     /**
      * @brief Gets value stored in register
