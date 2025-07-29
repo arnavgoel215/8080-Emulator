@@ -74,6 +74,7 @@ void Emulator::executeInstruction()
         RegisterCode dst = (RegisterCode)((opcode >> 3) & 0x07);  // Determines which register to set
         RegisterCode src = (RegisterCode)(opcode & 0x07);  // Determines which register to get value from
         set_reg(dst, get_reg(src));
+        state.pc += 1;
         return;
     }
 
@@ -119,6 +120,7 @@ void Emulator::executeInstruction()
         case 0x2a: op_LHLD(); break;
         case 0x2b: op_DCX_H(); break;
         case 0x2c: op_INR_L(); break;
+        case 0x2d: op_DCR_L(); break;
         case 0x2e: op_MVI_L(); break;
         case 0x2f: op_CMA(); break;
         case 0x31: op_LXI_SP(); break;
@@ -431,7 +433,7 @@ void Emulator::op_DCR_B()
     state.flags.z = (result == 0);
     state.flags.s = ((result & 0x80) != 0);
     state.flags.p = __builtin_parity(result);
-    state.flags.ac = ((state.b & 0x0F) - 1) < 0;
+    state.flags.ac = ((state.b & 0x0F) != 0x00);
     state.b = result;
     state.pc += 1;
 }
@@ -474,7 +476,7 @@ void Emulator::op_DCR_C()
     state.flags.z = (result == 0);
     state.flags.s = ((result & 0x80) != 0);
     state.flags.p = __builtin_parity(result);
-    state.flags.ac = ((state.c & 0x0F) - 1) < 0;
+    state.flags.ac = ((state.c & 0x0F) != 0x00);
     state.c = result;
     state.pc += 1;
 }
@@ -505,7 +507,7 @@ void Emulator::op_DCR_D()
     state.flags.z = (result == 0);
     state.flags.s = ((result & 0x80) != 0);
     state.flags.p = __builtin_parity(result);
-    state.flags.ac = ((state.d & 0x0F) - 1) < 0;
+    state.flags.ac = ((state.d & 0x0F) != 0x00);
     state.d = result;
     state.pc += 1;
 }
@@ -548,7 +550,7 @@ void Emulator::op_DCR_E()
     state.flags.z = (result == 0);
     state.flags.s = ((result & 0x80) != 0);
     state.flags.p = __builtin_parity(result);
-    state.flags.ac = ((state.e & 0x0F) - 1) < 0;
+    state.flags.ac = ((state.e & 0x0F) != 0x00);
     state.e = result;
     state.pc += 1;
 }
@@ -579,7 +581,7 @@ void Emulator::op_DCR_H()
     state.flags.z = (result == 0);
     state.flags.s = ((result & 0x80) != 0);
     state.flags.p = __builtin_parity(result);
-    state.flags.ac = ((state.h & 0x0F) - 1) < 0;
+    state.flags.ac = ((state.h & 0x0F) != 0x00);
     state.h = result;
     state.pc += 1;
 }
@@ -640,6 +642,17 @@ void Emulator::op_INR_L()
     state.l = result;
     state.pc += 1;
 }
+// 0x2D: DCR L
+void Emulator::op_DCR_L()
+{
+    uint8_t result = state.l - 1;
+    state.flags.z = (result == 0);
+    state.flags.s = ((result & 0x80) != 0);
+    state.flags.p = __builtin_parity(result);
+    state.flags.ac = ((state.l & 0x0F) != 0x00);
+    state.l = result;
+    state.pc += 1;
+}
 // 0x34: INR M
 void Emulator::op_INR_M()
 {
@@ -662,7 +675,7 @@ void Emulator::op_DCR_M()
     state.flags.z = (result == 0);
     state.flags.s = ((result & 0x80) != 0);
     state.flags.p = __builtin_parity(result);
-    state.flags.ac = ((original & 0x0F) - 1) < 0;
+    state.flags.ac = ((original & 0x0F) != 0x00);
     memory.WriteByte (addr, result);
     state.pc += 1;
 }
@@ -695,7 +708,7 @@ void Emulator::op_DCR_A()
     state.flags.z = (result == 0);
     state.flags.s = ((result & 0x80) != 0);
     state.flags.p = __builtin_parity(result);
-    state.flags.ac = ((state.a & 0x0F) - 1) < 0;
+    state.flags.ac = ((state.a & 0x0F) != 0x00);
     state.a = result;
     state.pc += 1;
 }
@@ -713,6 +726,7 @@ void Emulator::op_ADD(uint8_t val)
     *a = result & 0xFF;  // Ensures that new value fits within 8-bits
 
     setFlags(*a);
+    state.pc += 1;
 }
 // 88 to 8F: ADC
 void Emulator::op_ADC(uint8_t val)
@@ -728,6 +742,7 @@ void Emulator::op_ADC(uint8_t val)
     *a = result & 0xFF;  // Ensures that new value fits within 8-bits
 
     setFlags(*a);
+    state.pc += 1;
 }
 // 90 to 97 SUB
 void Emulator::op_SUB(uint8_t val) 
@@ -743,6 +758,7 @@ void Emulator::op_SUB(uint8_t val)
     *a = result & 0xFF;  // Ensures that new value fits within 8-bits
 
     setFlags(*a);
+    state.pc += 1;
 }
 // 98 to 9F SBB
 void Emulator::op_SBB(uint8_t val)
@@ -760,6 +776,7 @@ void Emulator::op_SBB(uint8_t val)
 
     *a = result & 0xFF;  // Ensures that new value fits within 8-bits
     setFlags(*a);
+    state.pc += 1;
 }
 // Logical Group
 // 0x07: RLC
@@ -809,6 +826,7 @@ void Emulator::op_ANA(uint8_t val)
     state.flags.cy = 0;
     state.flags.ac = 1;  // AC flag is always set to 1 during ANA instruction
     setFlags(state.a);
+    state.pc += 1;
 }
 // A8 to AF XRA
 void Emulator::op_XRA(uint8_t val)
@@ -817,6 +835,7 @@ void Emulator::op_XRA(uint8_t val)
     state.flags.cy = 0;
     state.flags.ac = 0;
     setFlags(state.a);
+    state.pc += 1;
 }
 // B0 to B7 ORA
 void Emulator::op_ORA(uint8_t val)
@@ -878,26 +897,26 @@ void Emulator::op_RET_cond(bool condition)
 // Handles jump conditionals
 void Emulator::op_JMP_cond(bool condition)
 {
-     uint16_t addr = memory.ReadByte(state.pc) | (memory.ReadByte(state.pc + 1) << 8);
+     uint16_t addr = (memory.ReadByte(state.pc + 2) << 8) | memory.ReadByte(state.pc + 1);
     if (condition)
         state.pc = addr;
     else
-        state.pc += 2;
+        state.pc += 3;
 }
 // Handles call conditionals
 void Emulator::op_CALL_cond(bool condition)
 {
-    uint16_t addr = memory.ReadByte(state.pc) | (memory.ReadByte(state.pc + 1) << 8); // replaced
     if (condition)
     {
-        state.pc += 2;
-        memory.WriteByte(--state.sp, (state.pc >> 8) & 0xFF);
-        memory.WriteByte(--state.sp, state.pc & 0xFF);  
-        state.pc = addr;
+        uint16_t ret_addr = state.pc + 3;
+        memory.WriteByte(state.sp - 1, (ret_addr >> 8) & 0xFF);
+        memory.WriteByte(state.sp - 2, ret_addr & 0xFF);
+        state.sp -= 2;
+        state.pc = (memory.ReadByte(state.pc + 2) << 8) | memory.ReadByte(state.pc + 1);
     }
     else
     {
-        state.pc += 2;
+        state.pc += 3;
     }
 }
 
@@ -1128,7 +1147,7 @@ void Emulator::set_reg(uint8_t code, uint8_t val)
         case REG_E: state.e = val; break;
         case REG_H: state.h = val; break;
         case REG_L: state.l = val; break;
-        case REG_M: memory.WriteByte(hl(), val);
+        case REG_M: memory.WriteByte(hl(), val); break;
         case REG_A: state.a = val; break;
     }
 }

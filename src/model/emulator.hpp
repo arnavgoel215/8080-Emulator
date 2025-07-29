@@ -303,6 +303,8 @@ private:
     void op_DCX_H();
     /** @brief 0x2C: Increment register L */
     void op_INR_L();
+    /** @brief 0x2D: Decrement register L */
+    void op_DCR_L();
     /** @brief 0x34: Increment memory */
     void op_INR_M();
     /** @brief 0x35: Decrement memory */

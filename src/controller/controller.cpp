@@ -58,7 +58,6 @@ void Controller::onLoadROM(const std::string& romFilePath, bool *isValidRomPath)
     m_isRunning = false;
     if (true == m_model->loadROM(romFilePath))
     {
-        m_model->reset();
         if (m_view) {
             // m_view->showStatusMessage("ROM loaded successfully. Press Start.");
         }
