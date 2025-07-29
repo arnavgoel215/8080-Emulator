@@ -3,7 +3,7 @@
  * 
  * @brief Implementation of the 8080 emulator core.
  * 
- * @author: Jesse, Arnav
+ * @author: Jesse, Arnav, Fredo, Sergio
  * 
  *********************************************************/
 
@@ -36,6 +36,7 @@ Emulator::Emulator()
 void Emulator::reset()
 {
     state = {}; // Zero-initialize all registers and flags
+    state.port_in_1.bit_3_reserved = 1; // Bit 3 is always 1 (Not sure if it's relevant to the game, though.)
     state.pc = 0x0000; // Start execution from the beginning of memory
     state.sp = 0x0000;
     memory.Clear();
@@ -1020,13 +1021,13 @@ void Emulator::op_EI()
 void Emulator::op_IN()
 {
     uint8_t port = memory.ReadByte(state.pc++);
-    io_read(port);
+    state.a = io_read(static_cast<InPortNum>(port));
 }
 // 0xD3: OUT d8 
 void Emulator::op_OUT()
 {
     uint8_t port = memory.ReadByte(state.pc++); 
-    state.a = io_write(port, state.a);
+    io_write(static_cast<OutPortNum>(port), state.a);
 }
 
 void Emulator::requestInterrupt(uint8_t interrupt_num)
@@ -1089,44 +1090,46 @@ uint16_t Emulator::hl() const
     return (state.h << 8) | state.l;
 }
 
-uint8_t Emulator::io_read(uint8_t port)
+uint8_t Emulator::io_read(InPortNum port)
 {
     switch (port)
     {
-        case 0:  // IN0: coin and start buttons
-            return state.port_in_0;
-        case 1:  // IN1: player 1 controls
-            return state.port_in_1;
-        case 2:  // IN2: player 2 controls
-            return state.port_in_2;
-        case 3:  // IN3: shift register result
+        case InPortNum::INP0:  // IN0: Unused.
+            return 0;
+        case InPortNum::INP1:  // IN1: player 1 controls and coin input.
+            return state.port_in_1.byte;
+        case InPortNum::INP2:  // IN2: player 2 controls.
+            return state.port_in_2.byte;
+        case InPortNum::SHFT_IN:  // IN3: shift register result.
             return (state.shift_register >> (8 - state.shift_offset)) & 0xFF;
         default:
             return 0;
     }
 }
 
-uint8_t Emulator::io_write(uint8_t port, uint8_t val)
+void Emulator::io_write(OutPortNum port, uint8_t val)
 {
     switch (port)
     {
-        case 2:  // OUT2: shift register offset
+        case OutPortNum::SHFTAMNT:  // OUT2: shift register offset
             state.shift_offset = val & 0x07;  // only lower 3 bits used
             break;
-        case 4:  // OUT4: shift register data
-            state.shift_register = (state.shift_register >> 8) | (val << 8);
-            break;
-        case 3:  // OUT3: sound control (not fully implemented here)
+        case OutPortNum::SOUND1:  // OUT3: sound control (not fully implemented here)
             std::cout << "Sound control (OUT 3) write: " << std::hex << (int)val << "\n";
             break;
-        case 5:  // OUT5: sound control 2
+        case OutPortNum::SHFT_DATA:  // OUT4: shift register data
+            state.shift_register = (state.shift_register >> 8) | (val << 8);
+            break;
+        case OutPortNum::SOUND2:  // OUT5: sound control 2
             std::cout << "Sound control (OUT 5) write: " << std::hex << (int)val << "\n";
+            break;
+        case OutPortNum::WATCHDOG:// OUT6: Watchdog control
+            std::cout << "Watchdog Control (OUT 6) (Not implemented): " << "\n";
             break;
         default:
             std::cout << "Unknown OUT port " << std::hex << (int)port << ": " << (int)val << "\n";
             break;
     }
-    return 0;
 }
 
 uint8_t Emulator::get_reg(uint8_t code)
