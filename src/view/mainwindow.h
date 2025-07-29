@@ -151,6 +151,14 @@ private slots:
     void on_actionInsert_Coin_triggered();
 
     /**
+     * @brief Player 1 Start Button triggered.
+     *
+     * This slot is called when the user clicks
+     * the 'P1 Start' menu option
+     */
+    void on_actionP1_Start_triggered();
+
+    /**
      * @brief Slot for Run Video Test.
      * 
      * This slot is called whenever the user
@@ -237,6 +245,20 @@ private:
      */
     void calculateFPS(void);
 
+    /**
+     * @brief Auxiliary function to create pulsed key events.
+     * 
+     * This function creates a key press event, and after X milliseconds
+     * it will clear it.
+     * 
+     * It does so by creating a callback on the timer with a lambda closure
+     * with the local context.
+     * 
+     * @param key Qt Key enumeration.
+     * @param milliseconds Time defined for the pulse duration in ms.
+     * @param blockAction Optional argument to disable menu action while the pulsed key is pressed.
+     */
+    void pulseKey(int key, unsigned int milliseconds, QAction *blockAction = nullptr);
 
     /***************** Private class elements. ***********************/
 
@@ -291,5 +313,10 @@ private:
      * and block key events when the game is not active.
      */
     bool romIsLoaded = false;
+
+    /**
+     * @brief Simulated key pulse time.
+     */
+    static constexpr unsigned int KEY_PULSE_TIME_MS = 300;
 };
 #endif // MAINWINDOW_H

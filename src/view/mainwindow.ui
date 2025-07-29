@@ -46,6 +46,7 @@
     <addaction name="action_Re_Start_Game"/>
     <addaction name="actionPause_Game"/>
     <addaction name="actionInsert_Coin"/>
+    <addaction name="actionP1_Start"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
@@ -97,6 +98,14 @@
    </property>
    <property name="text">
     <string>Close ROM</string>
+   </property>
+  </action>
+  <action name="actionP1_Start">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>P1 Start (Enter)</string>
    </property>
   </action>
  </widget>
