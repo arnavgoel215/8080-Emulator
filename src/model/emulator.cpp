@@ -1124,7 +1124,7 @@ void Emulator::io_write(OutPortNum port, uint8_t val)
             std::cout << "Sound control (OUT 5) write: " << std::hex << (int)val << "\n";
             break;
         case OutPortNum::WATCHDOG:// OUT6: Watchdog control
-            std::cout << "Watchdog Control (OUT 6) (Not implemented): " << "\n";
+            std::cout << "Watchdog Control (OUT 6) (Not implemented)" << "\n";
             break;
         default:
             std::cout << "Unknown OUT port " << std::hex << (int)port << ": " << (int)val << "\n";
