@@ -122,29 +122,15 @@ void MainWindow::on_actionInsert_Coin_triggered()
     // NOTE: It might not be the most optimal to hardcode the 'C' press.
     // In the future it might be better to abstract all the game
     // actions before sending them to the controller.
-
-    QTimer *releaseKeyTimer = new QTimer;
-    releaseKeyTimer->setSingleShot(true);
-    releaseKeyTimer->setInterval(300); // 300 ms.
-
-    // Set key state first.
-    emit sendKeySignal(Qt::Key_C, true);
-
-    // Temporarily disable option.
-    ui->actionInsert_Coin->setDisabled(true);
-
-    // Call up single shot timer to release key 300 ms later.
-    connect(releaseKeyTimer, &QTimer::timeout, this, [=](){
-        emit sendKeySignal(Qt::Key_C, false);
-
-        // Reenable menu option.
-        ui->actionInsert_Coin->setDisabled(false);
-
-        // Deallocate timer.
-        delete releaseKeyTimer;
-    });
-    releaseKeyTimer->start();
+    pulseKey(Qt::Key_C, KEY_PULSE_TIME_MS, ui->actionInsert_Coin);
 }
+
+void MainWindow::on_actionP1_Start_triggered()
+{
+    // Simulate pulsing enter key.
+    pulseKey(Qt::Key_Enter, KEY_PULSE_TIME_MS, ui->actionP1_Start);
+}
+
 
 void MainWindow::on_actionRun_Video_Test_triggered()
 {
@@ -323,4 +309,29 @@ void MainWindow::calculateFPS(void)
     qDebug() << "FPS: " << QString::number(fpsEstimation);
 }
 
+void MainWindow::pulseKey(int key, unsigned int milliseconds, QAction *blockAction)
+{
+    // Create a temporary timer that will generate a callback
+    // that will release a key state.
+    QTimer *releaseKeyTimer = new QTimer;
+    releaseKeyTimer->setSingleShot(true);
+    releaseKeyTimer->setInterval(milliseconds);
 
+    // Set key state first.
+    emit sendKeySignal(key, true);
+
+    // Temporarily disable option.
+    blockAction->setDisabled(true);
+
+    // Call up single shot timer to release key later.
+    connect(releaseKeyTimer, &QTimer::timeout, this, [=](){
+        emit sendKeySignal(key, false);
+
+        // Reenable menu option.
+        blockAction->setDisabled(false);
+
+        // Deallocate timer.
+        delete releaseKeyTimer;
+    });
+    releaseKeyTimer->start();
+}
