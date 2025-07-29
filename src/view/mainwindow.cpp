@@ -321,14 +321,20 @@ void MainWindow::pulseKey(int key, unsigned int milliseconds, QAction *blockActi
     emit sendKeySignal(key, true);
 
     // Temporarily disable option.
-    blockAction->setDisabled(true);
+    if (nullptr != blockAction)
+    {
+        blockAction->setDisabled(true);
+    }
 
     // Call up single shot timer to release key later.
     connect(releaseKeyTimer, &QTimer::timeout, this, [=](){
         emit sendKeySignal(key, false);
 
         // Reenable menu option.
-        blockAction->setDisabled(false);
+        if (nullptr != blockAction)
+        {
+            blockAction->setDisabled(false);
+        }
 
         // Deallocate timer.
         delete releaseKeyTimer;

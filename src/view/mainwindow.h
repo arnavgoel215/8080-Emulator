@@ -253,8 +253,12 @@ private:
      * 
      * It does so by creating a callback on the timer with a lambda closure
      * with the local context.
+     * 
+     * @param key Qt Key enumeration.
+     * @param milliseconds Time defined for the pulse duration in ms.
+     * @param blockAction Optional argument to disable menu action while the pulsed key is pressed.
      */
-    void pulseKey(int key, unsigned int milliseconds, QAction *blockAction);
+    void pulseKey(int key, unsigned int milliseconds, QAction *blockAction = nullptr);
 
     /***************** Private class elements. ***********************/
 
