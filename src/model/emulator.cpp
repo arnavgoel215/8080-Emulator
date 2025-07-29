@@ -1054,7 +1054,15 @@ void Emulator::requestInterrupt(uint8_t interrupt_num)
  */
 void Emulator::setInputState(GameInput input, bool isPressed)
 {
-    // TODO
+    switch(input)
+    {
+        case GameInput::Coin:     { state.port_in_1.coin     = (uint8_t)isPressed; break; }
+        case GameInput::P1_Start: { state.port_in_1.p1_start = (uint8_t)isPressed; break; }
+        case GameInput::P1_Shoot: { state.port_in_1.p1_shoot = (uint8_t)isPressed; break; }
+        case GameInput::P1_Left:  { state.port_in_1.p1_left  = (uint8_t)isPressed; break; }
+        case GameInput::P1_Right: { state.port_in_1.p1_right = (uint8_t)isPressed; break; }
+        default: { break; }
+    }
 }
 
 CPUState Emulator::getCPUState() const
