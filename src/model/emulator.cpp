@@ -219,35 +219,44 @@ void Emulator::executeInstruction()
         case 0xC0: op_RET_cond(!state.flags.z); break;  // RNZ
         case 0xC2: op_JMP_cond(!state.flags.z); break;  // JNZ addr
         case 0xC4: op_CALL_cond(!state.flags.z); break;  // CNZ addr
-        case 0xC6: op_ADD(memory.ReadByte(state.pc++)); break;  // ADI d8
+        case 0xC6: op_ADI(memory.ReadByte(state.pc + 1)); break;  // ADI d8
         case 0xC8: op_RET_cond(state.flags.z); break;  // RZ
         case 0xCA: op_JMP_cond(state.flags.z); break;  // JZ addr
         case 0xCC: op_CALL_cond(state.flags.z); break; // CZ addr
-        case 0xCE: op_ADD(memory.ReadByte(state.pc++)); break;  // ACI d8
+        case 0xCE: op_ACI(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // ACI d8
         case 0xD0: op_RET_cond(!state.flags.cy); break;  // RNC
         case 0xD2: op_JMP_cond(!state.flags.cy); break;  // JNC addr
         case 0xD4: op_CALL_cond(!state.flags.cy); break;  // CNC addr
-        case 0xD6: op_SUB(memory.ReadByte(state.pc++)); break;  // SUI d8
+        case 0xD6: op_SUI(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // SUI d8
+        case 0xDE: op_SBI(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // SBI d8
         case 0xD8: op_RET_cond(state.flags.cy); break;  // RC
         case 0xDA: op_RET_cond(state.flags.cy); break;  // JC addr
         case 0xDC: op_CALL_cond(state.flags.cy); break;  // CC addr
-        case 0xDE: op_SBB(memory.ReadByte(state.pc++)); break;  // SBI d8
         case 0xE0: op_RET_cond(!state.flags.p); break;  // RPO
         case 0xE2: op_JMP_cond(!state.flags.p); break;  // JPO addr
         case 0xE4: op_CALL_cond(!state.flags.p); break;  // CPO addr
-        case 0xE6: op_ANA(memory.ReadByte(state.pc++)); break; // ANI d8
+        case 0xE6: op_ANA(memory.ReadByte(state.pc + 1)); break; // ANI d8
         case 0xE8: op_RET_cond(state.flags.p); break;  // RPE
         case 0xEA: op_JMP_cond(state.flags.p); break;  // JPE addr
         case 0xEC: op_CALL_cond(state.flags.p); break;  // CPE addr
-        case 0xEE: op_XRA(memory.ReadByte(state.pc++)); break; // XRI d8
+        case 0xEE: op_XRA(memory.ReadByte(state.pc + 1)); break; // XRI d8
         case 0xF0: op_RET_cond(!state.flags.s); break;  // RP
         case 0xF2: op_JMP_cond(!state.flags.s); break;  // JP addr
         case 0xF4: op_CALL_cond(!state.flags.s); break;  // CP addr
-        case 0xF6: op_ORA(memory.ReadByte(state.pc++)); break; // ORI d8
+        case 0xF6: op_ORA(memory.ReadByte(state.pc + 1)); state.pc += 2; break; // ORI d8
+        case 0xC7: op_RST(0); break;  // RST 0 | Call address 0x00
+        case 0xCF: op_RST(1); break;  // RST 1 | Call address 0x08
+        case 0xD7: op_RST(2); break;  // RST 2 | Call address 0x10
+        case 0xDF: op_RST(3); break;  // RST 3 | Call address 0x18
+        case 0xE7: op_RST(4); break;  // RST 4 | Call address 0x20
+        case 0xEF: op_RST(5); break;  // RST 5 | Call address 0x28
+        case 0xF7: op_RST(6); break;  // RST 6 | Call address 0x30
+        case 0xFF: op_RST(7); break;  // RST 7 | Call address 0x38
+        case 0xF9: op_SPHL(); break;  // SPHL: SP ← HL
         case 0xF8: op_RET_cond(state.flags.s); break;  // RM
         case 0xFA: op_JMP_cond(state.flags.s); break;  // JM addr
         case 0xFC: op_CALL_cond(state.flags.s); break;  // CM addr
-        case 0xFE: op_CMP(memory.ReadByte(state.pc++)); break;  // CPI d8
+        case 0xFE: op_CMP(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // CPI d8
         case 0xD3: op_OUT(); break;  // OUT d8
         case 0xDB: op_IN(); break;  // IN d8
 
@@ -713,6 +722,88 @@ void Emulator::op_DCR_A()
     state.a = result;
     state.pc += 1;
 }
+
+// =========================== Opcode: ADI d8 ================================
+// Opcode      : 0xC6
+// Mnemonic    : ADI d8
+//
+// Adds the immediate 8-bit value (d8) to the accumulator A.
+// A ← A + d8
+// Affects all flags: Z, S, P, CY, AC
+void Emulator::op_ADI(uint8_t val)
+{
+    uint8_t originalA = state.a;
+    uint16_t result = static_cast<uint16_t>(state.a) + val;
+
+    state.flags.cy = result > 0xFF;
+    state.flags.ac = ((originalA & 0x0F) + (val & 0x0F)) > 0x0F;
+
+    state.a = static_cast<uint8_t>(result);
+    setFlags(state.a);
+
+    // Advance PC by 2 (1 for opcode, 1 for immediate byte)
+    state.pc += 2;
+}
+// =========================== Opcode: SUI d8 ================================
+// Opcode      : 0xD6
+// Mnemonic    : SUI d8
+//
+// Subtract immediate 8-bit value from A.
+// A ← A - d8
+// Affects all flags: Z, S, P, CY, AC
+void Emulator::op_SUI(uint8_t val) {
+    uint8_t originalA = state.a;
+    uint16_t result = static_cast<uint16_t>(state.a) - val;
+
+    state.flags.cy = (val > originalA);
+    state.flags.ac = ((originalA & 0x0F) < (val & 0x0F));
+
+    state.a = static_cast<uint8_t>(result);
+    setFlags(state.a);
+}
+
+// =========================== Opcode: SBI d8 ================================
+// Opcode      : 0xDE
+// Mnemonic    : SBI d8
+//
+// Subtract immediate 8-bit value and borrow (CY) from A.
+// A ← A - d8 - CY
+// Affects all flags: Z, S, P, CY, AC
+void Emulator::op_SBI(uint8_t val) {
+    uint8_t originalA = state.a;
+    uint8_t borrow = state.flags.cy ? 1 : 0;
+    uint16_t result = static_cast<uint16_t>(state.a) - val - borrow;
+
+    state.flags.cy = (val + borrow > originalA);
+    state.flags.ac = ((originalA & 0x0F) < ((val & 0x0F) + borrow));
+
+    state.a = static_cast<uint8_t>(result);
+    setFlags(state.a);
+}
+
+// =========================== Opcode: ACI d8 ================================
+// Opcode      : 0xCE
+// Mnemonic    : ACI d8
+//
+// Adds immediate 8-bit value and Carry flag to accumulator A.
+// A ← A + d8 + CY
+// Affects all flags: Z, S, P, CY, AC
+void Emulator::op_ACI(uint8_t val) {
+    uint8_t originalA = state.a;
+    uint8_t carryIn = state.flags.cy ? 1 : 0;
+
+    uint16_t result = static_cast<uint16_t>(state.a) + val + carryIn;
+
+    // Calculate AC before modifying flags
+    state.flags.ac = ((originalA & 0x0F) + (val & 0x0F) + carryIn) > 0x0F;
+    state.flags.cy = result > 0xFF;
+
+    state.a = static_cast<uint8_t>(result);
+    setFlags(state.a);
+}
+
+
+
 // 80 to 87: ADD
 void Emulator::op_ADD(uint8_t val)
 {
@@ -729,6 +820,7 @@ void Emulator::op_ADD(uint8_t val)
     setFlags(*a);
     state.pc += 1;
 }
+
 // 88 to 8F: ADC
 void Emulator::op_ADC(uint8_t val)
 {
@@ -820,12 +912,27 @@ void Emulator::op_CMC()
     state.flags.cy = !state.flags.cy;
     state.pc += 1;
 }
-// A0 to A7 ANA
+
+// =========================== Opcode: ANA r/M ============================
+// Opcode Range : 0xA0–0xA7 (register) | 0xE6 (immediate)
+// Mnemonic     : ANA r / ANA M / ANI d8
+//
+// Performs a logical AND between the accumulator (A) and the given operand.
+// The result is stored back into A. |  A ← A & operand
+//
+// Flag Behavior:
+// - Z (Zero):    Set if result is 0 |  S (Sign):    Set if bit 7 of result is 1
+// - P (Parity):  Set if result has even parity | CY (Carry):  Always cleared to 0
+// - AC (Aux Carry): Set if bit 3 of A or operand is set (A[3] | operand[3])
+//
+// Usage Notes:
+// - No effect on PC other than in the calling opcode handler.
+// - Immediate variant (ANI d8) must handle PC += 2 externally.
 void Emulator::op_ANA(uint8_t val)
 {
-    state.a = state.a & val;  // AND operation
+    state.flags.ac = ((state.a | val) & 0x08) != 0;  
+    state.a = state.a & val;
     state.flags.cy = 0;
-    state.flags.ac = 1;  // AC flag is always set to 1 during ANA instruction
     setFlags(state.a);
     state.pc += 1;
 }
@@ -856,8 +963,7 @@ void Emulator::op_CMP(uint8_t val)
     uint16_t result = *a - val;
     *cy = (*a < val);
     *ac = ((*a & 0x0F) < (val & 0x0F));
-
-    setFlags(result & 0xFF);
+    setFlags(result);
 }
 
 // Branch Group
@@ -970,23 +1076,55 @@ void Emulator::op_POP_H()
     state.sp += 2;
     state.pc += 1;
 }
-// 0xE3: XTHL
-void Emulator::op_XTHL()
-{
+
+// =========================== Opcode: XTHL ================================
+// Opcode      : 0xE3
+// Mnemonic    : XTHL
+// 
+// Exchange the contents of register pair HL with the word at
+// the top of the stack (i.e., memory at address SP and SP+1).
+// L <-> [SP] | H <-> [SP+1]
+// This is a direct, in-place swap with no flags affected.
+void Emulator::op_XTHL() {
+    // Save stack contents before overwriting
     uint8_t temp_l = memory.ReadByte(state.sp);       
     uint8_t temp_h = memory.ReadByte(state.sp + 1);   
+
+    // Write HL into stack
     memory.WriteByte(state.sp,     state.l);          
     memory.WriteByte(state.sp + 1, state.h);
+
+    // Load original stack contents into HL
+    state.l = temp_l;
+    state.h = temp_h;
+
+    // Advance PC
     state.pc += 1;
 }
-// 0xE5: PUSH H
-void Emulator::op_PUSH_H()
-{
-    memory.WriteByte(state.sp - 1, state.h);    
-    memory.WriteByte(state.sp - 2, state.l); 
+
+
+// ========================== Opcode: PUSH H ================================
+// Opcode      : 0xE5
+// Mnemonic    : PUSH H
+// Push the contents of register pair HL onto the stack.
+// Stack grows downward, so SP is decremented by 2 before writing.
+// L is written to SP, H to SP+1. Program counter is advanced.
+//
+// Stack Effect: SP = SP - 2 || [SP]   = L || [SP+1] = H
+
+void Emulator::op_PUSH_H() {
+    // Decrement SP before writing
     state.sp -= 2;
+
+    // Write HL into stack (low at SP, high at SP+1)
+    memory.WriteByte(state.sp,     state.l);  
+    memory.WriteByte(state.sp + 1, state.h);
+
+    // Advance program counter
     state.pc += 1;
 }
+
+
 // 0xF1: POP PSW
 void Emulator::op_POP_PSW()
 {
@@ -1029,6 +1167,43 @@ void Emulator::op_OUT()
     uint8_t port = memory.ReadByte(state.pc++); 
     io_write(static_cast<OutPortNum>(port), state.a);
 }
+
+// ====================== Opcode: Stack ==========================
+
+// ====================== Opcode: RST =============================
+// Opcode      : (0)0xC7 = 0x0 | (1)0xCF = 0x08 | (2)0xD7 = 0x10 
+// (3)0xDF = 0x18 | (4)0xE7 = 0x20 | (5)0xEF = 0x28 | (6)0x F7 = 0x30 
+// (7)0xFF = 0x38 
+// Mnemonic    : RST
+// Simulates a restart instruction by pushing the return address 
+// (PC + 1) onto the stack and jumping to a hardcoded address n * 8
+// n - The restart number (0 to 7), corresponding to address 0x00 to 0x38
+// SP is decremented by 2, and the return address is stored on stack.
+// Return address is the instruction following the RST call
+void Emulator::op_RST(int n) {
+    uint16_t returnAddr = state.pc + 1;  
+    state.sp -= 1;
+    memory.WriteByte(state.sp, (returnAddr >> 8) & 0xFF);
+    state.sp -= 1;
+    memory.WriteByte(state.sp, returnAddr & 0xFF);
+    state.pc = n * 8;
+}
+
+// ====================== Opcode: SPHL (0xF9) ==========================
+// Simulates the SPHL instruction (Opcode 0xF9)
+// SPHL copies the contents of the HL register pair into the Stack Pointer (SP).
+// No flags are affected. HL remains unchanged.
+// This is typically used to transfer a calculated memory address into SP
+// for stack operations or function calls.
+// 
+// SP ← HL
+void Emulator::op_SPHL() {
+    state.sp = (static_cast<uint16_t>(state.h) << 8) | state.l;
+}
+
+
+
+
 
 void Emulator::requestInterrupt(uint8_t interrupt_num)
 {
@@ -1082,8 +1257,9 @@ void Emulator::setFlags(uint8_t result)
     // Flags Z, S and P get set based on final result of operation
     state.flags.z = (result == 0);
     state.flags.s = (result & 0x80);
-    state.flags.p = __builtin_parity(result);
+    state.flags.p = !__builtin_parity(result);
 }
+
 
 uint16_t Emulator::hl() const
 {

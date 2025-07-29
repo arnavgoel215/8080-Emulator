@@ -525,7 +525,7 @@ void UnitTest_ANI_Immediate() {
 
     printTestResult("ANI", "A = 0xF0 & 0x0F → A = 0x00", state.a == 0x00);
 }
-
+/*
 // ====================== Unit Test: ORI Immediate ===============================
 // ORI: Logical OR with immediate 0x0F, expect A = A | 0x0F
 void UnitTest_ORI_Immediate() {
@@ -543,6 +543,44 @@ void UnitTest_ORI_Immediate() {
 
     printTestResult("ORI", "A = 0xF0 | 0x0F → A = 0xFF", state.a == 0xFF);
 }
+*/
+
+// ====================== Unit Test: ORI Immediate ===============================
+// ORI: Logical OR between A and immediate value 0x0F → A = A | 0x0F
+void UnitTest_ORI_Immediate() {
+    uint8_t initialA = 0xF0;
+    uint8_t immediate = 0x0F;
+
+    // Opcode 0xF6 is ORI d8
+    CPUState state = runSingleInstruction({0xF6, immediate}, [&](CPUState& cpu) {
+        cpu.a = initialA;
+    });
+
+#ifdef ENABLE_VERBOSE_DEBUG
+    printLogicDebug("ORI",
+        initialA,               // LHS (A)
+        immediate,              // RHS (immediate)
+        state.a,                // Actual A result
+        state.flags,            // Actual flags
+        0xFF,                   // Expected A = 0xF0 | 0x0F = 0xFF
+        false,                  // Z: not zero
+        true,                   // S: sign bit is 1
+        true,                   // P: even parity (8 bits set)
+        false,                  // CY: should be cleared
+        false                   // AC: should be cleared
+    );
+#endif
+
+    bool pass = (state.a == 0xFF &&
+                 state.flags.z == false &&
+                 state.flags.s == true &&
+                 state.flags.p == true &&
+                 state.flags.cy == false &&
+                 state.flags.ac == false);
+
+    printTestResult("ORI", "A = 0xF0 | 0x0F → A = 0xFF", pass);
+}
+
 
 // ====================== Unit Test: XRI Immediate ===============================
 // XRI: Logical XOR with immediate 0xFF, expect A = A ^ 0xFF
@@ -556,7 +594,7 @@ void UnitTest_XRI_Immediate() {
 
 #ifdef ENABLE_VERBOSE_DEBUG
     printLogicDebug("XRI", initialA, immediate, state.a, state.flags,
-                    0xAA, false, true, false, false, false);
+                    0xAA, true, true, true, false, false);
 #endif
 
     printTestResult("XRI", "A = 0x55 ^ 0xFF → A = 0xAA", state.a == 0xAA);
@@ -564,7 +602,8 @@ void UnitTest_XRI_Immediate() {
 
 // ====================== Unit Test: CPI Immediate ===============================
 // CPI: Compare A with immediate 0x10
-void UnitTest_CPI_Immediate() {
+void UnitTest_CPI_Immediate()
+{
     uint8_t initialA = 0x20;
     uint8_t immediate = 0x10;
 
@@ -573,13 +612,14 @@ void UnitTest_CPI_Immediate() {
     });
 
 #ifdef ENABLE_VERBOSE_DEBUG
-    printLogicDebug("CPI", initialA, immediate, state.a, state.flags,
+    printLogicDebug("CPI Greater", initialA, immediate, state.a, state.flags,
                     0x20, false, false, false, false, false);
 #endif
 
     bool pass = (state.flags.cy == false && state.flags.z == false);
     printTestResult("CPI", "A = 0x20, Imm = 0x10 → A > Imm", pass);
 }
+
 
 // ====================== Memory-Based Logical Ops =========================
 
@@ -660,9 +700,16 @@ void UnitTest_CPI_Equal() {
     uint8_t initialA = 0x10;
     uint8_t immediate = 0x10;
 
-    CPUState state = runSingleInstruction({0xFE, immediate}, [&](CPUState& cpu) {
-        cpu.a = initialA;
-    });
+    Emulator emu;
+    CPUState& cpu = emu.getCPUStateRef();
+    Memory& mem   = emu.getMemoryRef();
+
+    cpu.a = initialA;
+    mem.writeRomBytes(0x0000, 0xFE);      // CPI opcode
+    mem.writeRomBytes(0x0001, immediate); // operand = 0x10
+    emu.emulateCycles(1);
+
+    CPUState& state = cpu;
 
 #ifdef ENABLE_VERBOSE_DEBUG
     printLogicDebug("CPI Equal", initialA, immediate, state.a, state.flags,
@@ -672,6 +719,7 @@ void UnitTest_CPI_Equal() {
     bool pass = (state.flags.z == true && state.flags.cy == false);
     printTestResult("CPI Equal", "A = Imm → Z = 1, CY = 0", pass);
 }
+
 
 // ====================== Unit Test: CPI Less ===============================
 // CPI: Compare A < immediate value, expect CY = 1, Z = 0
@@ -692,15 +740,24 @@ void UnitTest_CPI_Less() {
     printTestResult("CPI Less", "A < Imm → CY = 1, Z = 0", pass);
 }
 
+
 // ====================== Unit Test: CPI Greater ===============================
-// CPI: Compare A > immediate value, expect CY = 0, Z = 0
+// CPI: Compare A with immediate 0x10 (A > immediate)
+// Expected: CY = 0, Z = 0
 void UnitTest_CPI_Greater() {
     uint8_t initialA = 0x30;
     uint8_t immediate = 0x10;
 
-    CPUState state = runSingleInstruction({0xFE, immediate}, [&](CPUState& cpu) {
-        cpu.a = initialA;
-    });
+    Emulator emu;
+    CPUState& cpu = emu.getCPUStateRef();
+    Memory& mem   = emu.getMemoryRef();
+
+    cpu.a = initialA;
+    mem.writeRomBytes(0x0000, 0xFE);  // CPI
+    mem.writeRomBytes(0x0001, immediate);  // operand = 0x10
+
+    emu.emulateCycles(1);
+    CPUState state = cpu;
 
 #ifdef ENABLE_VERBOSE_DEBUG
     printLogicDebug("CPI Greater", initialA, immediate, state.a, state.flags,
@@ -710,6 +767,7 @@ void UnitTest_CPI_Greater() {
     bool pass = (state.flags.z == false && state.flags.cy == false);
     printTestResult("CPI Greater", "A > Imm → CY = 0, Z = 0", pass);
 }
+
 
 // =================== Entry Point ===========================================
 int main() {
@@ -746,7 +804,7 @@ int main() {
     std::cout << "=== XRA (Logical XOR with Register) Tests Complete ===\n\n";
 
     // === CMP (Compare Register) ===
-    std::cout << "=== Starting CMP (Compare Register) Tests ===\n";
+    std::cout << "=== Starting CMP (Compare Register) Tests ===\n\n";
     UnitTest_CMP_B();
     UnitTest_CMP_C();
     UnitTest_CMP_D();
@@ -756,7 +814,7 @@ int main() {
     std::cout << "=== CMP (Compare Register) Tests Complete ===\n\n";
 
     // === CMA / Immediate Logic Ops ===
-   std::cout << "=== Starting CMA / Immediate Logic Ops Tests ===\n";
+   std::cout << "=== Starting CMA / Immediate Logic Ops Tests ===\n\n";
     UnitTest_CMA();
     UnitTest_ANI_Immediate();
     UnitTest_ORI_Immediate();
@@ -771,7 +829,7 @@ int main() {
     UnitTest_CMP_M();
 
     // === CPI (Compare Immediate Variations) ===
-     std::cout << "=== Starting CPI (Compare Immediate Variations) Tests ===\n";
+     std::cout << "=== Starting CPI (Compare Immediate Variations) Tests ===\n\n";
     UnitTest_CPI_Equal();
     UnitTest_CPI_Less();
     UnitTest_CPI_Greater();

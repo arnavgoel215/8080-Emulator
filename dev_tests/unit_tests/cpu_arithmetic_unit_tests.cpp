@@ -87,7 +87,7 @@ void UnitTest_ADD_FF() {
 #ifdef ENABLE_VERBOSE_DEBUG
     printArithmeticDebug("ADD 0xFF",
         0x02, 0xFF, false, cpu.a, cpu.flags,
-        0x01, true);
+        0x01, true, false, false, false, true);
 #endif
     printTestResult("ADD 0xFF", "A = 0x02 + 0xFF → A = 0x01, CY = 1", cpu.a == 0x01 && cpu.flags.cy);
 }
