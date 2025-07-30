@@ -230,7 +230,7 @@ void Emulator::executeInstruction()
         case 0xD6: op_SUI(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // SUI d8
         case 0xDE: op_SBI(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // SBI d8
         case 0xD8: op_RET_cond(state.flags.cy); break;  // RC
-        case 0xDA: op_RET_cond(state.flags.cy); break;  // JC addr
+        case 0xDA: op_JMP_cond(state.flags.cy); break;  // JC addr
         case 0xDC: op_CALL_cond(state.flags.cy); break;  // CC addr
         case 0xE0: op_RET_cond(!state.flags.p); break;  // RPO
         case 0xE2: op_JMP_cond(!state.flags.p); break;  // JPO addr
