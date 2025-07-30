@@ -998,7 +998,7 @@ void Emulator::op_PCHL()
 // Handles return conditionals
 void Emulator::op_RET_cond(bool condition)
 {
-    if (condition) 
+    if (condition)
     {
         op_RET();
     }
@@ -1164,8 +1164,9 @@ void Emulator::op_EI()
 // 0xDB: IN d8
 void Emulator::op_IN()
 {
-    uint8_t port = memory.ReadByte(state.pc++);
+    uint8_t port = memory.ReadByte(state.pc + 1);
     state.a = io_read(static_cast<InPortNum>(port));
+    state.pc += 2;
 }
 // 0xD3: OUT d8 
 void Emulator::op_OUT()
