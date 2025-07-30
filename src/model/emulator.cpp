@@ -230,7 +230,7 @@ void Emulator::executeInstruction()
         case 0xD6: op_SUI(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // SUI d8
         case 0xDE: op_SBI(memory.ReadByte(state.pc + 1)); state.pc += 2; break;  // SBI d8
         case 0xD8: op_RET_cond(state.flags.cy); break;  // RC
-        case 0xDA: op_RET_cond(state.flags.cy); break;  // JC addr
+        case 0xDA: op_JMP_cond(state.flags.cy); break;  // JC addr
         case 0xDC: op_CALL_cond(state.flags.cy); break;  // CC addr
         case 0xE0: op_RET_cond(!state.flags.p); break;  // RPO
         case 0xE2: op_JMP_cond(!state.flags.p); break;  // JPO addr
@@ -998,8 +998,14 @@ void Emulator::op_PCHL()
 // Handles return conditionals
 void Emulator::op_RET_cond(bool condition)
 {
-    if (condition) 
+    if (condition)
+    {
         op_RET();
+    }
+    else
+    {
+        state.pc += 1;
+    }
 }
 // Handles jump conditionals
 void Emulator::op_JMP_cond(bool condition)
@@ -1158,8 +1164,9 @@ void Emulator::op_EI()
 // 0xDB: IN d8
 void Emulator::op_IN()
 {
-    uint8_t port = memory.ReadByte(state.pc++);
+    uint8_t port = memory.ReadByte(state.pc + 1);
     state.a = io_read(static_cast<InPortNum>(port));
+    state.pc += 2;
 }
 // 0xD3: OUT d8 
 void Emulator::op_OUT()
