@@ -235,7 +235,7 @@ void Emulator::executeInstruction()
         case 0xE0: op_RET_cond(!state.flags.p); break;  // RPO
         case 0xE2: op_JMP_cond(!state.flags.p); break;  // JPO addr
         case 0xE4: op_CALL_cond(!state.flags.p); break;  // CPO addr
-        case 0xE6: op_ANA(memory.ReadByte(state.pc + 1)); break; // ANI d8
+        case 0xE6: op_ANA(memory.ReadByte(state.pc + 1)); state.pc += 1;break; // ANI d8
         case 0xE8: op_RET_cond(state.flags.p); break;  // RPE
         case 0xEA: op_JMP_cond(state.flags.p); break;  // JPE addr
         case 0xEC: op_CALL_cond(state.flags.p); break;  // CPE addr
@@ -1164,9 +1164,11 @@ void Emulator::op_IN()
 // 0xD3: OUT d8 
 void Emulator::op_OUT()
 {
-    uint8_t port = memory.ReadByte(state.pc++); 
+    uint8_t port = memory.ReadByte(state.pc + 1);
     io_write(static_cast<OutPortNum>(port), state.a);
+    state.pc += 2;
 }
+
 
 // ====================== Opcode: Stack ==========================
 
