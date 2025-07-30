@@ -999,7 +999,13 @@ void Emulator::op_PCHL()
 void Emulator::op_RET_cond(bool condition)
 {
     if (condition) 
+    {
         op_RET();
+    }
+    else
+    {
+        state.pc += 1;
+    }
 }
 // Handles jump conditionals
 void Emulator::op_JMP_cond(bool condition)
