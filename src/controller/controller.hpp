@@ -14,6 +14,7 @@
 
 /***************** Include files. ***********************/
 #include <string>
+#include <QMutex>
 #include "emulator.hpp" // Needs to know about the Emulator's public interface
 #include "common_frame_cfg.h" // For frame_buffer_t type.
 
@@ -72,7 +73,7 @@ public slots:
     /**
      * @brief Handles the user request to toggle the emulation (Start/Pause).
      */
-    void onToggleRun();
+    void onToggleRun(bool *isRunning);
 
     /**
      * @brief Handles the user request to reset the emulation.
@@ -108,6 +109,9 @@ private:
     MainWindow* m_view;
     bool m_isRunning;
     std::string m_romPath;
+    const uint8_t* emulatorFrameBufferPtr;
+    frame_buffer_t m_frameBuffer;
+    QMutex mutex;
 
     // --- Constants ---
     // The original arcade machine had a 2MHz CPU and a 60Hz refresh rate.

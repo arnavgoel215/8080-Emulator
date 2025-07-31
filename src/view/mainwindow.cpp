@@ -105,14 +105,12 @@ void MainWindow::on_actionClose_ROM_triggered()
 
 void MainWindow::on_action_Re_Start_Game_triggered()
 {
-    // Reset emulator.
-    emit sendResetSignal();
+    resetGame();
 }
 
 void MainWindow::on_actionPause_Game_triggered()
 {
-    // Toggle pause.
-    emit sendToggleRunSignal();
+    toggleRun();
 }
 
 void MainWindow::on_actionInsert_Coin_triggered()
@@ -238,7 +236,7 @@ void MainWindow::on_frameBufferReceived(const frame_buffer_t *buffer)
     currentRenderedImage = newImage;
 
     // Debug print FPS.
-    calculateFPS();
+    // calculateFPS(); // Uncomment to print approximated FPS in console.
 
     // Update UI with painted graphics.
     this->update();
@@ -258,16 +256,16 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         // Catch UI shortcuts.
         switch(event->key())
         {
-            // Pause Game.
+            // Pause/Resume Game.
             case Qt::Key_P:
             {
-                emit sendToggleRunSignal();
+                toggleRun();
                 break;
             }
             // (Re)Start Game.
             case Qt::Key_R:
             {
-                emit sendResetSignal();
+                resetGame();
             }
             // Any other keys are redirected to controller.
             default:
@@ -340,4 +338,28 @@ void MainWindow::pulseKey(int key, unsigned int milliseconds, QAction *blockActi
         delete releaseKeyTimer;
     });
     releaseKeyTimer->start();
+}
+
+void MainWindow::toggleRun()
+{
+    bool isRunning = false;
+    emit sendToggleRunSignal(&isRunning);
+
+    // Toggle title state.
+    if (true == isRunning)
+    {
+        this->setWindowTitle("Space Invaders");
+    }
+    else
+    {
+        this->setWindowTitle("Space Invaders (Paused)");
+    }
+}
+
+
+void MainWindow::resetGame()
+{
+    // Reset title screen, in case the game was paused.
+    this->setWindowTitle("Space Invaders");
+    emit sendResetSignal();
 }

@@ -22,6 +22,7 @@ static constexpr size_t FRAME_HEIGHT = 256;
 static constexpr size_t FRAME_WIDTH = 224;
 static constexpr size_t PIXELS_PER_BYTE = 8;
 static constexpr size_t FRAME_BUFFER_LEN = (FRAME_HEIGHT * FRAME_WIDTH) / PIXELS_PER_BYTE;
+static constexpr size_t FRAME_BUFFER_MID_SCREEN = FRAME_BUFFER_LEN / 2;
 
 using frame_buffer_t = std::array<uint8_t, FRAME_BUFFER_LEN>;
 

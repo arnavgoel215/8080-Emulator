@@ -12,8 +12,10 @@
 #include "controller.hpp"
 #include "mainwindow.h"
 
+#include <algorithm> // For std::fill.
+
 // Qt tools.
-#include <QKeyEvent> // For Qt Key enumrations.
+#include <QKeyEvent> // For Qt Key enumerations.
 
 /***************** Macros and defines. ***********************/
 // The VRAM size for Space Invaders is 7168 bytes.
@@ -30,6 +32,11 @@ constexpr size_t VRAM_SIZE = 7168;
 Controller::Controller(Emulator* model, MainWindow* view, QObject* parent)
     : QObject{parent}, m_model(model), m_view(view), m_isRunning(false), m_romPath("")
 {
+    if (nullptr == m_model || nullptr == m_view)
+    {
+        throw "Expected non-null pointers to model and view.";
+    }
+
     // For some reason dynamic libraries struggle with the new signal/slot syntax,
     // The older SIGNAL/SLOT macros are more lenient and allow detection of
     // the interfaces as long as the class is derived from QObject.
@@ -50,12 +57,17 @@ Controller::Controller(Emulator* model, MainWindow* view, QObject* parent)
     connect(view, SIGNAL(sendCloseGameSignal()), this, SLOT(onCloseGame()));
 
     // Toggle Run (View -> Controller).
-    connect(view, SIGNAL(sendToggleRunSignal()), this, SLOT(onToggleRun()));
+    connect(view, SIGNAL(sendToggleRunSignal(bool*)), this, SLOT(onToggleRun(bool*)));
+
+    // Initialize frame buffer.
+    std::fill(m_frameBuffer.begin(), m_frameBuffer.end(), 0);
+
+    // Get emulator frame base pointe.
+    emulatorFrameBufferPtr = m_model->getFrameBuffer();
 }
 
 void Controller::onLoadROM(const std::string& romFilePath, bool *isValidRomPath)
 {
-    m_isRunning = false;
     if (true == m_model->loadROM(romFilePath))
     {
         if (m_view) {
@@ -69,6 +81,9 @@ void Controller::onLoadROM(const std::string& romFilePath, bool *isValidRomPath)
 
         // Store copy of path.
         m_romPath = romFilePath;
+
+        // Start game immediately after load.
+        m_isRunning = true;
     }
     else
     {
@@ -79,18 +94,27 @@ void Controller::onLoadROM(const std::string& romFilePath, bool *isValidRomPath)
     }
 }
 
-void Controller::onToggleRun()
+void Controller::onToggleRun(bool *isRunning)
 {
     m_isRunning = !m_isRunning;
     if (m_view) {
         // m_view->showStatusMessage(m_isRunning ? "Emulation running." : "Emulation paused.");
     }
+
+    // Communicate back the state to the signal sender.
+    if (nullptr != isRunning)
+    {
+        *isRunning = m_isRunning;
+    }
 }
 
 void Controller::onReset()
 {
-    m_isRunning = false;
+    mutex.lock(); // Ensure no frames are running when resetting.
+
+    // This is probably not thread safe.
     m_model->reset();
+    std::fill(m_frameBuffer.begin(), m_frameBuffer.end(), 0);
     if ("" != m_romPath)
     {
         m_model->loadROM(m_romPath);
@@ -99,10 +123,14 @@ void Controller::onReset()
             // m_view->showStatusMessage("Game reset.");
         }
     }
+
+    m_isRunning = true; // Restart game immediately.
+    mutex.unlock();
 }
 
 void Controller::onCloseGame()
 {
+    mutex.lock(); // Ensure no frames are running before closing the game.
     m_isRunning = false;
     m_model->reset();
     m_romPath = ""; // Clear out temporal ROM path.
@@ -110,6 +138,7 @@ void Controller::onCloseGame()
     {
         // m_view->showStatusMessage("Game closed.");
     }
+    mutex.unlock();
 }
 
 void Controller::onKeyEvent(int key, bool isPressed)
@@ -152,6 +181,8 @@ void Controller::runFrame()
         return;
     }
 
+    mutex.lock(); // Block any other signals that alter the emulator state.
+
     // Emulate cycles for the first half of the screen.
     m_model->emulateCycles(CYCLES_PER_FRAME / 2);
 
@@ -159,25 +190,26 @@ void Controller::runFrame()
     // of the original Space Invaders hardware.
     m_model->requestInterrupt(1);
 
+    // Copy first half of the screen to the frame buffer.
+    memcpy(m_frameBuffer.data(), emulatorFrameBufferPtr, FRAME_BUFFER_MID_SCREEN);
+
     // Emulate cycles for the second half of the screen.
     m_model->emulateCycles(CYCLES_PER_FRAME / 2);
 
     // Trigger the V-Blank interrupt (RST 2). This signals the end of a frame.
     m_model->requestInterrupt(2);
 
-    if (m_view) {
-        // The model should provide a pointer to its internal framebuffer.
-        const uint8_t* frameBuffer = m_model->getFrameBuffer();
-        if (frameBuffer)
-        {
-            // The view should have a method to take the raw framebuffer data and render it.
-            // m_view->updateGraphics(frameBuffer, VRAM_SIZE);
-        }
+    // Copy the second half of the screen to the frame buffer.
+    memcpy(m_frameBuffer.data() + FRAME_BUFFER_MID_SCREEN, emulatorFrameBufferPtr + FRAME_BUFFER_MID_SCREEN, FRAME_BUFFER_MID_SCREEN);
 
-        // The view could also have a method to display debug info.
-        // CPUState state = m_model->getCPUState();
-        // m_view->updateDebugInfo(state);
-    }
+    // Send buffer frame signal to view class.
+    emit sendframeBuffer(&m_frameBuffer);
+
+    // The view could also have a method to display debug info.
+    // CPUState state = m_model->getCPUState();
+    // m_view->updateDebugInfo(state);
+
+    mutex.unlock();
 }
 
 // --- CLI / Debug Methods ---

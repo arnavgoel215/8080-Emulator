@@ -214,8 +214,11 @@ signals:
 
     /**
      * @brief Send Pause/Run toggle signal.
+     * 
+     * @param[out] isRunning Output value to determine if the
+     *                       running is true or not.
      */
-    void sendToggleRunSignal(void);
+    void sendToggleRunSignal(bool *isRunning);
 
     /**
      * @brief Send Reset signal.
@@ -259,6 +262,27 @@ private:
      * @param blockAction Optional argument to disable menu action while the pulsed key is pressed.
      */
     void pulseKey(int key, unsigned int milliseconds, QAction *blockAction = nullptr);
+
+    /**
+     * @brief Sends the toggle signal to the controller.
+     * 
+     * Additionally changes the title screen to indicate
+     * if the game is paused.
+     * 
+     * This can be called from the menu bar, or by 
+     * pressing 'P'.
+     */
+    void toggleRun();
+
+    /**
+     * @brief Sends the reset signal to the controller.
+     * 
+     * Resets the state of the title screen, if paused.
+     * 
+     * This can be called from the menu bar, or by 
+     * pressing 'R'.
+     */
+    void resetGame();
 
     /***************** Private class elements. ***********************/
 
