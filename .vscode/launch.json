@@ -168,10 +168,10 @@
         ]
 },
 {
-        "name": "macOS - Debug Disassembler",
+        "name": "macOS - Debug Application",
         "type": "cppdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/out/disassembler_main",
+        "program": "${workspaceFolder}/out/space_invaders_emulator",
         "args": [],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
