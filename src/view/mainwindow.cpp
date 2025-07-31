@@ -236,7 +236,7 @@ void MainWindow::on_frameBufferReceived(const frame_buffer_t *buffer)
     currentRenderedImage = newImage;
 
     // Debug print FPS.
-    calculateFPS();
+    // calculateFPS(); // Uncomment to print approximated FPS in console.
 
     // Update UI with painted graphics.
     this->update();
