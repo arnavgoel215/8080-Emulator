@@ -1,2 +1,0 @@
-Placeholder file for test data.
-This folder holds mock input files or test ROMs.
