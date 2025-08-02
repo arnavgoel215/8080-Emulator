@@ -43,13 +43,13 @@ This directory contains all official documentation for the Intel 8080 Space Inva
 
 ---
 
-## 🧪 Development & Testing
+## Development & Testing
 
 - [`testing.md`](testing.md)  
   Describes the project’s testing structure, test categories (unit, functional, integration), and `test_utils.hpp` usage.
 
-- [`dev_notes.md`](dev_notes.md)  
-  Ongoing developer notes, planning thoughts, rough ideas, progress and implementation details in progress.
+- [`test_utils.md`](test_utils.md)  
+  Documentation for the `test_utils.hpp` header. Includes color formatting, test ID numbering, and utility macros for emulator test output.
 
 ---
 

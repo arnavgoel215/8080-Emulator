@@ -1,4 +1,4 @@
-# ✅ Emulator Testing Strategy
+# Emulator Testing Strategy
 
 ## Overview
 
@@ -6,7 +6,7 @@ Testing verifies correctness of opcode execution, memory layout, stack behavior,
 
 ---
 
-## 🔍 Unit Testing
+## Unit Testing
 
 ### Focus Areas:
 - **CPU Instructions:** Arithmetic, logic, flow control, stack, rotation
@@ -28,7 +28,7 @@ Testing verifies correctness of opcode execution, memory layout, stack behavior,
 
 ---
 
-## 🧪 Functional Testing
+## Functional Testing
 
 - `run_frame()` checked for accurate buffer generation
 - `stepSingleInstruction()` confirms micro-step execution
@@ -36,21 +36,21 @@ Testing verifies correctness of opcode execution, memory layout, stack behavior,
 
 ---
 
-## 🎥 Frame Buffer Testing
+##  Frame Buffer Testing
 
 - `FrameBufferTester` used for automated video output stress tests
 - Simulates 60Hz frame output to confirm stability and performance
 
 ---
 
-## 🧩 Integration Validation
+## Integration Validation
 
 - Confirmed input → signal → state update → frame render pipeline
 - Full test of emulator running game loop with user input simulation
 
 ---
 
-## 📈 Coverage Tracking
+## Coverage Tracking
 
 - Opcode coverage tracked against actual game ROM usage
 - Snapshot validation of CPU state vs. expected values
@@ -58,7 +58,7 @@ Testing verifies correctness of opcode execution, memory layout, stack behavior,
 
 ---
 
-## 🚧 Future Test Plans
+## Future Test Plans
 
 - Emulator state snapshots for regression testing
 - CPU instruction cycle accuracy profiling
