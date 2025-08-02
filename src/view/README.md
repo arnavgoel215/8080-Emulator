@@ -1,5 +1,40 @@
-# View Layer – User-Facing Visualization and Output
+# View Module
 
-The View layer is responsible for presenting emulator state and output to the user. It transforms emulator data into human-readable or visual formats, such as graphics rendering, disassembled code views, and UI configuration interfaces.
+Handles GUI rendering, window events, video test modes, and color masking for the emulator’s display output.
 
 ---
+
+## Files
+
+```
+view/
+├── mainwindow.cpp / mainwindow.h
+├── frame_buffer_tester.cpp / .h
+├── common_frame_cfg.h
+├── resources/
+├── CMakeLists.txt
+```
+
+---
+
+## Responsibilities
+
+- Renders the game screen using `QPainter` and `QImage`.
+- Maps Qt key events into controller signals.
+- Provides debug/test UI tools like buffer testing and pause/restart control.
+- Loads ROM folder via file dialog and displays error messages.
+
+---
+
+## Interactions
+
+- Emits `sendRomPath()` to Controller.
+- Receives `updateFrameBuffer()` signal from frame buffer tester.
+
+---
+
+## Related Features
+
+- Video test mode
+- Color mask overlay
+- Game control UI
