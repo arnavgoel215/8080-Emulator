@@ -1,5 +1,9 @@
 # 8080 Emulator
-TODO: Add project description.
+Intel 8080 Emulator oriented to run the Space Invaders game.
+
+**NOTE:** Space Invaders ROM not included. Make sure you have access to a legally obtained copy.
+
+## [`Documentation`](docs/README.md)  
 
 ## Required tools
 
@@ -39,3 +43,6 @@ In VSCode, press `CTRL + SHIFT + B`, then select the desired build recipe, or al
 
 ### On GDB
 Alternatively you can run the built executables in the `out` folder with GDB to debug directly from the command line.
+
+### Screen sample
+![Title Screen](assets/images/title_screen.png)

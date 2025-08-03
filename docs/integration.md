@@ -53,3 +53,7 @@ VRAM ➜ Emulator ➜ FrameBuffer ➜ Controller ➜ MainWindow ➜ QPainter
 - Accurate transformation of frame buffer into correctly rotated image
 
 ---
+
+## Sample Sequence
+The following diagram denotes the typical flow of a user pressing an input, and the emulator running a full frame execution, while updating the video frame.
+![Sequence Diagram](diagrams/SpaceInvaderSeqDiagram.png)
