@@ -1,0 +1,136 @@
+@startuml
+
+package SpaceInvadersEmulator
+{
+    entity main
+
+    '''''''''''''''''' Packages. '''''''''''''''''''
+    package controller
+    {
+        class Controller
+        interface ControllerSlots
+    }
+
+    package view
+    {
+        class MainWindow
+        class UI_MainWindow
+        class FrameBufferTester
+        interface MainWindowSlots
+    }
+
+    package model
+    {
+        class Emulator
+        class Memory
+        entity RomLoader
+        struct CPUState
+    }
+
+    ''''''''''''''''''' Main.cpp '''''''''''''''''''
+    entity main {
+        - Objects Initialization
+        - GUI Thread
+        - Frame Emulator Thread
+    }
+
+    main -down-> controller.Controller
+    main -down-> view.MainWindow
+    main -down-> view.UI_MainWindow
+
+
+    ''''''''''''''''''' MainWindow class. '''''''''''''''''''
+    class view.MainWindow {
+        + paintEvent()
+        + keyPressEvent()
+        + keyReleaseEvent()
+    }
+
+    interface view.MainWindowSlots {
+        + on_frameBufferReceived()
+        - on Action Widget callbcks()
+    }
+
+    view.UI_MainWindow -down-> view.MainWindowSlots
+    view.MainWindow *-down- view.UI_MainWindow
+    view.MainWindow #-right- view.MainWindowSlots
+    view.MainWindow --> controller.ControllerSlots
+
+    class view.UI_MainWindow {
+        - UI QWidgets
+        + setupUi()
+    }
+
+
+    ''''''''''''''''''' FrameBufferTester class. '''''''''''''''''''
+    class view.FrameBufferTester {
+        -refreshTimer
+        -on_refreshTimerTimeout()
+    }
+
+    view.FrameBufferTester --> view.MainWindowSlots
+    view.MainWindow *-right- view.FrameBufferTester
+
+
+    ''''''''''''''''''' Controller class. '''''''''''''''''''
+    class controller.Controller {
+        + runFrame()
+        + getCPUStateForDebug()
+    }
+
+    interface controller.ControllerSlots {
+        + onLoadROM()
+        + onToggleRun()
+        + onReset()
+        + onCloseGame()
+        + onKeyEvent()
+    }
+
+    controller.Controller #-- controller.ControllerSlots
+    controller.Controller o-- view.MainWindow
+    controller.Controller o-- model.Emulator
+    controller.Controller --> view.MainWindowSlots
+
+    ''''''''''''''''''' Emulator class. '''''''''''''''''''
+    class model.Emulator {
+        + loadROM()
+        + emulateCycles()
+        + requestInterrupt()
+        + setInputState()
+        + getCPUState()
+        + getFrameBuffer()
+
+        - All opcodes()
+    }
+
+    model.Emulator *-- model.CPUState
+    model.Emulator *-- model.Memory
+    model.Emulator --> model.RomLoader
+
+    struct model.CPUState {
+        - Registers
+        - Program Counter
+        - Stack Pointer
+        - IO Ports
+    }
+
+
+    ''''''''''''''''''' Memory class. '''''''''''''''''''
+    class model.Memory {
+        + ReadByte()
+        + WriteByte()
+        + writeRomBytes()
+        + Clear()
+        + GetVRAM()
+        + GetVRAMPointer()
+    }
+
+
+    ''''''''''''''''''' RomLoader entity. '''''''''''''''''''
+    entity model.RomLoader {
+        + LoadSpaceInvadersROM()
+        - LoadROMFile()
+    }
+}
+' package SpaceInvadersEmulator
+@enduml

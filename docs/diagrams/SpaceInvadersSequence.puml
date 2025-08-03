@@ -1,0 +1,66 @@
+@startuml
+
+title __**Single Frame Emulation Sequence Diagram**__
+
+actor Player
+control FrameThread
+participant GUI
+participant MainWindow
+participant Controller
+participant Emulator
+participant Memory
+
+
+' Sequence for user input.
+
+Player -> GUI: Press Space Bar (fire Shoot)
+
+activate GUI
+GUI -> MainWindow: KeyPress Event
+
+activate MainWindow
+MainWindow -> Controller: User Input Event
+
+activate Controller
+Controller -> Emulator: Player 1 Shoot Input Set
+
+deactivate Emulator
+deactivate Controller
+deactivate MainWindow
+deactivate GUI
+
+
+activate FrameThread
+FrameThread -> Controller: Execute one frame
+
+activate Controller
+Controller -> Emulator: Execute X CPU Cyles for 1/120 FPS period.
+
+Emulator -> Memory: Update Video RAM
+
+Controller -> Emulator: Generate Interrupt RST 1 (Half Screen)
+
+Controller -> Emulator: Execute X CPU Cyles for 1/120 FPS period.
+
+Emulator -> Memory: Update Video RAM
+
+Controller -> Emulator: Generate Interrupt RST 2 (End Screen)
+
+Controller -> Memory: Get Video Frame Buffer
+activate Memory
+Memory --> Controller
+deactivate Memory
+
+Controller -> MainWindow: Send Video Frame Buffer
+activate MainWindow
+MainWindow -> GUI: Repaint Screen
+activate GUI
+GUI --> MainWindow
+deactivate GUI
+MainWindow --> Controller
+deactivate MainWindow
+
+Controller --> FrameThread
+
+@enduml
+
