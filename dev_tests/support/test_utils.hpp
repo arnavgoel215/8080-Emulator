@@ -45,21 +45,16 @@ inline const std::string RED   = "";
 inline const std::string RESET = "";
 #endif
 
-// ============================ Test Counter =================================
-// Global counter to number each test output
+// ============================ Test Counter ================================
+// Global counters to number each test output and track results
 inline int testCounter = 1;
+inline int testsPassed = 0;
+inline int testsFailed = 0;
 
 inline void resetTestCounter() {
     testCounter = 1;
-}
-
-// ============================ Hex Formatter ================================
-// Returns formatted hexadecimal string with leading zeros
-inline std::string hex(uint16_t val, int width = 4) {
-    std::ostringstream oss;
-    oss << "0x" << std::hex << std::uppercase
-        << std::setw(width) << std::setfill('0') << val;
-    return oss.str();
+    testsPassed = 0;
+    testsFailed = 0;
 }
 
 // ========================== Basic Test Result ==============================
@@ -72,6 +67,63 @@ inline void printTestResult(const std::string& tag,
               << (passed ? (GREEN + "[PASS]" + RESET)
                          : (RED + "[FAIL]" + RESET))
               << "\n\n";
+
+    if (passed) testsPassed++;
+    else        testsFailed++;
+}
+
+// ============================ Hex Formatter ================================
+// Returns formatted hexadecimal string with leading zeros
+inline std::string hex(uint16_t val, int width = 4) {
+    std::ostringstream oss;
+    oss << "0x" << std::hex << std::uppercase
+        << std::setw(width) << std::setfill('0') << val;
+    return oss.str();
+}
+
+// ========================== Basic Test Result ==============================
+/* // Standardized test pass/fail output with coloring and numbering
+inline void printTestResult(const std::string& tag,
+                            const std::string& description,
+                            bool passed) {
+    std::cout << "[" << tag << " | Test #" << std::dec << testCounter++ << "] "
+              << description << ": "
+              << (passed ? (GREEN + "[PASS]" + RESET)
+                         : (RED + "[FAIL]" + RESET))
+              << "\n\n";
+}
+*/
+inline void printOpcodeDebugBasic(const std::string& name,
+                                   uint8_t opcode,
+                                   uint16_t initialPC,
+                                   uint16_t finalPC,
+                                   const std::vector<std::string>& details,
+                                   bool pcExpected = true,
+                                   uint16_t expectedPC = 0) {
+#ifdef ENABLE_VERBOSE_DEBUG
+    std::cout << "[DEBUG: " << name << "]\n";
+    std::cout << "  Opcode         = 0x" << std::hex << (int)opcode << "\n";
+    std::cout << "  Initial PC     = " << hex(initialPC) << "\n";
+    std::cout << "  Final PC       = " << hex(finalPC) << "\n";
+    if (pcExpected) {
+        std::cout << "  PC " << (finalPC == expectedPC ? "Incremented" : "Incorrect")
+                  << "     = [" << (finalPC == expectedPC ? "PASS" : "FAIL") << "]\n";
+    }
+    for (const auto& line : details) {
+        std::cout << "  " << line << "\n";
+    }
+#endif
+}
+
+inline void printOpcodeFlags(const Flags& flags,
+                             bool expZ, bool expS, bool expP, bool expCY, bool expAC) {
+#ifdef ENABLE_VERBOSE_DEBUG
+    std::cout << "  Flags         = Z:" << (int)flags.z << " (exp:" << expZ << ")"
+              << " S:" << (int)flags.s << " (exp:" << expS << ")"
+              << " P:" << (int)flags.p << " (exp:" << expP << ")"
+              << " CY:" << (int)flags.cy << " (exp:" << expCY << ")"
+              << " AC:" << (int)flags.ac << " (exp:" << expAC << ")\n";
+#endif
 }
 
 // ======================== Simple Debug Snapshot ============================
@@ -130,6 +182,11 @@ inline CPUState runSingleInstruction(const std::vector<uint8_t>& opcode,
 
     emu.emulateCycles(1);
     return emu.getCPUState();
+}
+void writeRomInstructionSequence(Memory& mem, uint16_t startAddr, const std::vector<uint8_t>& bytes) {
+    for (size_t i = 0; i < bytes.size(); ++i) {
+        mem.writeRomBytes(startAddr + static_cast<uint16_t>(i), bytes[i]);
+    }
 }
 
 // ====================== Isolate Opcode w/ Memory & CPU =======================
@@ -297,6 +354,24 @@ inline void printSPHLDebug(uint16_t opcode,
     std::cout << "  Result SP     = " << hex(resultSP) << "\n";
     std::cout << "  SP = HL       = [" << ((originalSP != resultSP) ? "PASS" : "FAIL") << "]\n";
 }
+inline void printCallDebug(
+    const std::string& label,
+    uint16_t finalPC,
+    uint16_t expectedPC,
+    uint16_t stackPointer,
+    uint16_t expectedSP,
+    uint16_t returnAddr)
+{
+#ifdef ENABLE_VERBOSE_DEBUG
+    std::cout << "[DEBUG: " << label << "]\n";
+    std::cout << "  Final PC        = " << hex(finalPC) << "\n";
+    std::cout << "  Expected PC     = " << hex(expectedPC) << "\n";
+    std::cout << "  Return Addr     = " << hex(returnAddr) << "\n";
+    std::cout << "  Stack Pointer   = " << hex(stackPointer)
+              << " (Expected: " << hex(expectedSP) << ")\n";
+#endif
+}
+
 
 // Prints debug output for the XTHL instruction
 // Displays original and new values of HL and stack memory to verify correct exchange

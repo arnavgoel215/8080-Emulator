@@ -22,17 +22,17 @@
 #include <cassert>
 #include <iomanip>
 #include <bitset>
-#include <iostream>
+
 
 // ========================= Helper Functions ==============================
-// Write bytes into ROM starting at a given address (for test setup)
+// Write bytes into ROM starting at a given address (for test setup only)
 void writeRomInstructionSequence(Memory& mem, uint16_t startAddr, const std::vector<uint8_t>& bytes) {
     for (size_t i = 0; i < bytes.size(); ++i) {
         mem.writeRomBytes(startAddr + static_cast<uint16_t>(i), bytes[i]);
     }
 }
 
-// Write bytes into RAM starting at a given address (for test setup)
+// Write bytes into RAM starting at a given address (for test setup only)
 void writeRamInstructionSequence(Memory& mem, uint16_t startAddr, const std::vector<uint8_t>& bytes) {
     for (size_t i = 0; i < bytes.size(); ++i) {
         mem.WriteByte(startAddr + static_cast<uint16_t>(i), bytes[i]);

@@ -1,33 +1,32 @@
 # Dev Tests — Intel 8080 Emulator
 
-This directory contains all development tests for the Intel 8080 emulator project. Tests are grouped by purpose and scope to support a modular, layered approach to validation.
+This directory contains all development tests for the Intel 8080 emulator project.  
+Tests are grouped by type to support modular, layered validation from unit-level to system-level.
 
 ---
 
-##  Directory Structure
+## Directory Structure
 
 ```
 dev_tests/
-├── functional_tests/          # High-level behavior tests of individual components
-│   ├── io_functional_tests.cpp
-│   ├── memory_functional_tests.cpp
-│   └── romloader_functional_tests.cpp
+├── output/                    # Output for logs, snapshots, and dumps
+│   └── output.txt
 │
-├── integration_tests/        
-│   └── component_links/       # Integration Tests between linked modules
-│       └── romloader_to_memory_tests.cpp
-│
-│   ├── multi_component_flows/ # Integration testing between Multiple modules (3 or higher)
-│   └── system_level/          # Integration testing for End-to-end system-level validation
-├── manual_tests/              # Developer-driven manual tests
-├── output/                    # Output for logs, dumps, and snapshots
-│
-├── support/                   # Shared utilities for testing
+├── support/                   # Shared test utilities and debug macros
 │   └── test_utils.hpp
 │
-├── test_data/                 # ROMs, input files, and any other needed data
-│
-├── unit_tests/                # Isolated, low-level behavior tests 
+├── unit_tests/                # Unit tests for each module and opcode class
+│   ├── cpu_a_opcodes_test.cpp
+│   ├── cpu_arithmetic_unit_tests.cpp
+│   ├── cpu_c_opcodes_tests.cpp
+│   ├── cpu_d_opcodes_tests.cpp
+│   ├── cpu_data_transfer_unit_tests.cpp
+│   ├── cpu_flags_unit_tests.cpp
+│   ├── cpu_h_opcodes_tests.cpp
+│   ├── cpu_logic_unit_tests.cpp
+│   ├── cpu_mov_opcodes_tests.cpp
+│   ├── cpu_si_opcodes_tests.cpp
+│   ├── cpu_stack_unit_tests.cpp
 │   ├── io_unit_tests.cpp
 │   ├── memory_unit_tests.cpp
 │   └── romloader_unit_tests.cpp
@@ -35,46 +34,53 @@ dev_tests/
 
 ---
 
-##  Test Categories
+## Test Categories
 
-### `functional_tests/`
-- Tests high-level behavior of **single components** (e.g., memory, I/O, ROM loader).
-- Includes realistic usage flows like VRAM access or file-based ROM loading.
+### `unit_tests/`
+- Tests each module in isolation with fine-grained, opcode-by-opcode validation.
+- Coverage includes:
+  - CPU instructions grouped by register/opcode prefix
+  - I/O operations
+  - Memory module behaviors (ROM lockout, VRAM bounds)
+  - ROM loader mechanics
 
-###  `integration_tests/`
-- Focuses on **cross-module behavior**, such as verifying the ROM loader loads into protected memory.
-- Currently organized under `component_links/`.
+### `output/`
+- Contains test logs, output text dumps, or visual debug info.
+- Files like `cpu_data_tests` and `output.txt` record result history.
 
-###  `unit_tests/`
-- Isolated, **method-level verification** for memory, ROMLoader, and I/O subsystems.
-- Validates low-level invariants like ROM protection or VRAM pointer correctness.
-
-###  `manual_tests/`, `multi_component_flows/`, and `system_level/` *(planned)*
-- These folders will support interactive testing, full emulator flows, and top-down regression checks.
-
----
-
-##  Utilities
-
-###  `test_utils.hpp`
-- Provides consistent output formatting, test numbering, and ANSI color support.
-- Shared across all test files. Use `printTestResult(...)` and `hex(...)` utilities.
+### `support/`
+- Reusable tools for testing across all files.
+- Includes colorized output, test counters, and hex converters via `test_utils.hpp`.
 
 ---
 
-##  Build and Run
+## Build & Run Instructions
 
-To compile a test:
+Example (compile a test manually):
+
 ```bash
-g++ -std=c++17 -DENABLE_MEMORY_DEBUG -DENABLE_COLOR_OUTPUT \
-    dev_tests/functional_tests/memory_functional_tests.cpp \
-    src/model/memory.cpp -o dev_tests/output/memory_tests
+g++ -std=c++17 -DENABLE_COLOR_OUTPUT \
+    dev_tests/unit_tests/cpu_stack_unit_tests.cpp \
+    src/model/emulator.cpp src/model/memory.cpp \
+    -o dev_tests/output/cpu_stack_tests
 ```
 
 Then run:
+
 ```bash
-.dev_tests/output/memory_tests  
+./dev_tests/output/cpu_stack_tests
 ```
 
 ---
 
+##  Notes
+
+- Many test files are opcode-specific for traceability.
+- Grouped by register families (A, C, D, H, MOV, SI).
+- `test_utils.hpp` is shared and imported across all files.
+- Future additions:
+  - `functional_tests/` for high-level module behavior
+  - `integration_tests/` to validate module-to-module workflows
+  - `system_level/` for full emulator regression tests
+
+---
