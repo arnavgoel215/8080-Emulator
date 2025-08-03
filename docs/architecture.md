@@ -4,6 +4,10 @@
 
 This document outlines the high-level architecture, key components, and data flow for the Intel 8080 emulator designed to run Space Invaders. The project follows a **Model–View–Controller (MVC)** architecture, built in C++ with Qt for GUI rendering.
 
+## Block Architecture
+The following is a simplified block architecture diagram, showing the separation and concerns and which components are close to each other. (Does not necessarily reflect the code structure, but the guide towards the desing.)
+![Block Architecture](diagrams/SpaceInvadersEmulatorArchitecture_v2.drawio.png)
+
 ---
 
 ## Architecture Pattern: MVC
@@ -17,6 +21,10 @@ This document outlines the high-level architecture, key components, and data flo
 - The **Model** handles emulation logic and state.
 - The **View** manages all graphical user interface elements.
 - The **Controller** serves as the bridge, processing input and sending commands to the Model.
+
+## Class Diagram
+This is a more detailed type of diagram to show all the dependencies, interface usage, and compositions between all the classes in the system.
+![Class Diagram](diagrams/SpaceInvaderClassDiagram.png)
 
 ---
 
