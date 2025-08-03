@@ -55,3 +55,9 @@ This module includes the visual simulation logic and runtime controls related to
 - GUI state is dynamically updated (e.g., title bar, menus)
 
 ---
+
+## Screen rendering
+The way the original arcade machine rendered each frame was using a classic CRT scanline, but as it turns out the CRT screen is tilted 90 degrees to the right, so the frame processing must take that into consideration.
+
+There are two points at which the frame buffer must be saved, at the half and at the end of the screen, and each is coordinated in the emulator through interrupts RST1, and RST2.
+![Screen Rendering](diagrams/SpaceInvadersScreen.png)
