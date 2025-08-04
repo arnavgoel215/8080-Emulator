@@ -106,4 +106,14 @@
         <file>resources/frame103.png</file>
         <file>resources/frame104.png</file>
     </qresource>
+    <qresource prefix="/sounds">
+        <file alias="shoot.wav">resources/sounds/shoot.wav</file>
+        <file alias="invaderkilled.wav">resources/sounds/invaderkilled.wav</file>
+        <file alias="explosion.wav">resources/sounds/explosion.wav</file>
+        <file alias="ufo_highpitch.wav">resources/sounds/ufo_highpitch.wav</file>
+        <file alias="fastinvader1.wav">resources/sounds/fastinvader1.wav</file>
+        <file alias="fastinvader2.wav">resources/sounds/fastinvader2.wav</file>
+        <file alias="fastinvader3.wav">resources/sounds/fastinvader3.wav</file>
+        <file alias="fastinvader4.wav">resources/sounds/fastinvader4.wav</file>
+    </qresource>
 </RCC>

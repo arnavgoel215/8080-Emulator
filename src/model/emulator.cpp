@@ -36,6 +36,7 @@ Emulator::Emulator()
 void Emulator::reset()
 {
     state = {}; // Zero-initialize all registers and flags
+    m_soundState = {}; // Zero-initialize sound state
     state.port_in_1.bit_3_reserved = 1; // Bit 3 is always 1 (Not sure if it's relevant to the game, though.)
     state.pc = 0x0000; // Start execution from the beginning of memory
     state.sp = 0x0000;
@@ -1178,6 +1179,13 @@ const uint8_t* Emulator::getFrameBuffer() const
     return memory.GetVRAMPointer();
 }
 
+SoundState Emulator::getSoundState()
+{
+    SoundState stateToReturn = m_soundState;
+    m_soundState.hasChanged = false; // Reset after reading
+    return stateToReturn;
+}
+
 void Emulator::setFlags(uint8_t result)
 {
     // Flags Z, S and P get set based on final result of operation
@@ -1216,20 +1224,22 @@ void Emulator::io_write(OutPortNum port, uint8_t val)
         case OutPortNum::SHFTAMNT:  // OUT2: shift register offset
             state.shift_offset = val & 0x07;  // only lower 3 bits used
             break;
-        case OutPortNum::SOUND1:  // OUT3: sound control (not fully implemented here)
-            std::cout << "Sound control (OUT 3) write: " << std::hex << (int)val << "\n";
+        case OutPortNum::SOUND1:  // OUT3: sound control
+            m_soundState.port3 = val;
+            m_soundState.hasChanged = true;
             break;
         case OutPortNum::SHFT_DATA:  // OUT4: shift register data
             state.shift_register = (state.shift_register >> 8) | (val << 8);
             break;
         case OutPortNum::SOUND2:  // OUT5: sound control 2
-            std::cout << "Sound control (OUT 5) write: " << std::hex << (int)val << "\n";
+            m_soundState.port5 = val;
+            m_soundState.hasChanged = true;
             break;
         case OutPortNum::WATCHDOG:// OUT6: Watchdog control
-            std::cout << "Watchdog Control (OUT 6) (Not implemented)" << "\n";
+            // This is a hardware reset mechanism, not needed for emulation.
             break;
         default:
-            std::cout << "Unknown OUT port " << std::hex << (int)port << ": " << (int)val << "\n";
+            // std::cout << "Unknown OUT port " << std::hex << (int)port << ": " << (int)val << "\n";
             break;
     }
 }

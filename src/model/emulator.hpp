@@ -134,6 +134,16 @@ struct CPUState
 };
 
 /**
+ * @brief A plain data structure to hold the state of the sound-related hardware ports.
+ */
+struct SoundState
+{
+    uint8_t port3 = 0; // Sound port 1
+    uint8_t port5 = 0; // Sound port 2
+    bool hasChanged = false; // Flag to indicate a new sound event
+};
+
+/**
  * @brief The main class for the 8080 emulation model.
  */
 class Emulator
@@ -216,6 +226,12 @@ public:
     const uint8_t* getFrameBuffer() const;
 
     /**
+     * @brief Gets the current state of the sound hardware ports.
+     * @return A SoundState struct containing the port values.
+     */
+    SoundState getSoundState();
+
+    /**
      * @brief Defines the registers for the MOV instruction
      */
     enum RegisterCode : uint8_t {
@@ -236,6 +252,11 @@ private:
      * @brief The current state of the CPU registers and flags.
      */
     CPUState state;
+
+    /**
+     * @brief The current state of the sound hardware.
+     */
+    SoundState m_soundState;
 
     /**
      * @brief The 64KB memory space of the 8080.

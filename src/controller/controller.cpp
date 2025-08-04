@@ -37,6 +37,9 @@ Controller::Controller(Emulator* model, MainWindow* view, QObject* parent)
         throw "Expected non-null pointers to model and view.";
     }
 
+    // Create the sound manager
+    m_soundManager = std::make_unique<SoundManager>(this);
+
     // For some reason dynamic libraries struggle with the new signal/slot syntax,
     // The older SIGNAL/SLOT macros are more lenient and allow detection of
     // the interfaces as long as the class is derived from QObject.
@@ -157,6 +160,12 @@ void Controller::onKeyEvent(int key, bool isPressed)
             break;
         case Qt::Key_Space:
             input = GameInput::P1_Shoot;
+            // The sound is triggered by the I/O port write in the emulator,
+            // but playing it here gives instant feedback to the user.
+            if (isPressed)
+            {
+                m_soundManager->playPlayerShoot();
+            }
             break;
         case Qt::Key_A:
         case Qt::Key_Left:
@@ -205,12 +214,72 @@ void Controller::runFrame()
     // Send buffer frame signal to view class.
     emit sendframeBuffer(&m_frameBuffer);
 
-    // The view could also have a method to display debug info.
-    // CPUState state = m_model->getCPUState();
-    // m_view->updateDebugInfo(state);
+    // Handle any sound events that were triggered during this frame
+    handleSoundEvents();
 
     mutex.unlock();
 }
+
+void Controller::handleSoundEvents()
+{
+    SoundState soundState = m_model->getSoundState();
+    if (!soundState.hasChanged)
+    {
+        return;
+    }
+
+    // --- Port 3 ---
+    static uint8_t lastPort3 = 0;
+    uint8_t changedBits3 = soundState.port3 ^ lastPort3;
+
+    // Bit 0: UFO sound (this is a looping sound)
+    if (changedBits3 & 0x01) {
+        if (soundState.port3 & 0x01) {
+            m_soundManager->playUfo();
+        } else {
+            m_soundManager->stopUfo();
+        }
+    }
+    // Bit 1: Player shoot sound
+    if ((changedBits3 & 0x02) && (soundState.port3 & 0x02)) {
+        // This is the authentic trigger from the game's code.
+        // We also play it on key press for better responsiveness.
+        // m_soundManager->playPlayerShoot();
+    }
+    // Bit 2: Player killed sound
+    if ((changedBits3 & 0x04) && (soundState.port3 & 0x04)) {
+        m_soundManager->playPlayerKilled();
+    }
+    // Bit 3: Invader killed sound
+    if ((changedBits3 & 0x08) && (soundState.port3 & 0x08)) {
+        m_soundManager->playInvaderKilled();
+    }
+    lastPort3 = soundState.port3;
+
+
+    // --- Port 5 ---
+    static uint8_t lastPort5 = 0;
+    uint8_t changedBits5 = soundState.port5 ^ lastPort5;
+
+    // Bit 0: Invader walk 1
+    if ((changedBits5 & 0x01) && (soundState.port5 & 0x01)) {
+        m_soundManager->playInvaderMove1();
+    }
+    // Bit 1: Invader walk 2
+    if ((changedBits5 & 0x02) && (soundState.port5 & 0x02)) {
+        m_soundManager->playInvaderMove2();
+    }
+    // Bit 2: Invader walk 3
+    if ((changedBits5 & 0x04) && (soundState.port5 & 0x04)) {
+        m_soundManager->playInvaderMove3();
+    }
+    // Bit 3: Invader walk 4
+    if ((changedBits5 & 0x08) && (soundState.port5 & 0x08)) {
+        m_soundManager->playInvaderMove4();
+    }
+    lastPort5 = soundState.port5;
+}
+
 
 // --- CLI / Debug Methods ---
 

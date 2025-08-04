@@ -14,9 +14,11 @@
 
 /***************** Include files. ***********************/
 #include <string>
+#include <memory>
 #include <QMutex>
 #include "emulator.hpp" // Needs to know about the Emulator's public interface
 #include "common_frame_cfg.h" // For frame_buffer_t type.
+#include "SoundManager.hpp"
 
 // QT Specific tools.
 #include <QObject>
@@ -112,6 +114,10 @@ private:
     const uint8_t* emulatorFrameBufferPtr;
     frame_buffer_t m_frameBuffer;
     QMutex mutex;
+    std::unique_ptr<SoundManager> m_soundManager;
+
+    // --- Private Methods ---
+    void handleSoundEvents();
 
     // --- Constants ---
     // The original arcade machine had a 2MHz CPU and a 60Hz refresh rate.

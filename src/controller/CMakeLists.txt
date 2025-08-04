@@ -15,6 +15,8 @@ qt_add_library(controller
     STATIC
     ${CMAKE_CURRENT_LIST_DIR}/controller.cpp
     ${CMAKE_CURRENT_LIST_DIR}/controller.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/SoundManager.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/SoundManager.hpp
 )
 
 # Set up include directories.
