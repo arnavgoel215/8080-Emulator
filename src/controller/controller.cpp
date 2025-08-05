@@ -162,10 +162,10 @@ void Controller::onKeyEvent(int key, bool isPressed)
             input = GameInput::P1_Shoot;
             // The sound is triggered by the I/O port write in the emulator,
             // but playing it here gives instant feedback to the user.
-            if (isPressed)
-            {
-                m_soundManager->playPlayerShoot();
-            }
+            // if (isPressed)
+            // {
+            //     m_soundManager->playPlayerShoot();
+            // }
             break;
         case Qt::Key_A:
         case Qt::Key_Left:
@@ -244,7 +244,7 @@ void Controller::handleSoundEvents()
     if ((changedBits3 & 0x02) && (soundState.port3 & 0x02)) {
         // This is the authentic trigger from the game's code.
         // We also play it on key press for better responsiveness.
-        // m_soundManager->playPlayerShoot();
+        m_soundManager->playPlayerShoot();
     }
     // Bit 2: Player killed sound
     if ((changedBits3 & 0x04) && (soundState.port3 & 0x04)) {
