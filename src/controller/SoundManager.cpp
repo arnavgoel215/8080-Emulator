@@ -1,117 +1,118 @@
+
 #include "SoundManager.hpp"
 #include <QUrl>
+
 
 SoundManager::SoundManager(QObject *parent) : QObject(parent)
 {
     loadSounds();
-
-    // Connect signals to slots. This ensures the play() calls happen on the correct thread.
-    connect(this, &SoundManager::requestPlayPlayerShoot, this, &SoundManager::onPlayPlayerShoot);
-    connect(this, &SoundManager::requestPlayInvaderKilled, this, &SoundManager::onPlayInvaderKilled);
-    connect(this, &SoundManager::requestPlayPlayerKilled, this, &SoundManager::onPlayPlayerKilled);
-    connect(this, &SoundManager::requestPlayUfo, this, &SoundManager::onPlayUfo);
-    connect(this, &SoundManager::requestPlayInvaderMove1, this, &SoundManager::onPlayInvaderMove1);
-    connect(this, &SoundManager::requestPlayInvaderMove2, this, &SoundManager::onPlayInvaderMove2);
-    connect(this, &SoundManager::requestPlayInvaderMove3, this, &SoundManager::onPlayInvaderMove3);
-    connect(this, &SoundManager::requestPlayInvaderMove4, this, &SoundManager::onPlayInvaderMove4);
-    connect(this, &SoundManager::requestStopUfo, this, &SoundManager::onStopUfo);
 }
 
 SoundManager::~SoundManager() = default;
 
 void SoundManager::loadSounds()
 {
-    playerShootSound = std::make_unique<QSoundEffect>();
-    playerShootSound->setSource(QUrl("qrc:/sounds/shoot.wav"));
-    playerShootSound->setVolume(0.5f);
+    playerShootPlayer = std::make_unique<QMediaPlayer>();
+    playerShootOutput = std::make_unique<QAudioOutput>();
+    playerShootPlayer->setAudioOutput(playerShootOutput.get());
+    playerShootPlayer->setSource(QUrl("qrc:/sounds/shoot.wav"));
+    playerShootOutput->setVolume(0.5f);
 
-    invaderKilledSound = std::make_unique<QSoundEffect>();
-    invaderKilledSound->setSource(QUrl("qrc:/sounds/invaderkilled.wav"));
-    invaderKilledSound->setVolume(0.5f);
+    invaderKilledPlayer = std::make_unique<QMediaPlayer>();
+    invaderKilledOutput = std::make_unique<QAudioOutput>();
+    invaderKilledPlayer->setAudioOutput(invaderKilledOutput.get());
+    invaderKilledPlayer->setSource(QUrl("qrc:/sounds/invaderkilled.wav"));
+    invaderKilledOutput->setVolume(0.5f);
 
-    playerKilledSound = std::make_unique<QSoundEffect>();
-    playerKilledSound->setSource(QUrl("qrc:/sounds/explosion.wav"));
-    playerKilledSound->setVolume(0.5f);
+    playerKilledPlayer = std::make_unique<QMediaPlayer>();
+    playerKilledOutput = std::make_unique<QAudioOutput>();
+    playerKilledPlayer->setAudioOutput(playerKilledOutput.get());
+    playerKilledPlayer->setSource(QUrl("qrc:/sounds/explosion.wav"));
+    playerKilledOutput->setVolume(0.5f);
 
-    ufoSound = std::make_unique<QSoundEffect>();
-    ufoSound->setSource(QUrl("qrc:/sounds/ufo_highpitch.wav"));
-    ufoSound->setVolume(0.25f);
-    ufoSound->setLoopCount(QSoundEffect::Infinite);
+    ufoPlayer = std::make_unique<QMediaPlayer>();
+    ufoOutput = std::make_unique<QAudioOutput>();
+    ufoPlayer->setAudioOutput(ufoOutput.get());
+    ufoPlayer->setSource(QUrl("qrc:/sounds/ufo_highpitch.wav"));
+    ufoOutput->setVolume(0.25f);
+    // Looping for UFO sound
+    ufoPlayer->setLoops(QMediaPlayer::Infinite);
 
-    invaderMove1Sound = std::make_unique<QSoundEffect>();
-    invaderMove1Sound->setSource(QUrl("qrc:/sounds/fastinvader1.wav"));
-    invaderMove1Sound->setVolume(0.5f);
+    invaderMove1Player = std::make_unique<QMediaPlayer>();
+    invaderMove1Output = std::make_unique<QAudioOutput>();
+    invaderMove1Player->setAudioOutput(invaderMove1Output.get());
+    invaderMove1Player->setSource(QUrl("qrc:/sounds/fastinvader1.wav"));
+    invaderMove1Output->setVolume(0.5f);
 
-    invaderMove2Sound = std::make_unique<QSoundEffect>();
-    invaderMove2Sound->setSource(QUrl("qrc:/sounds/fastinvader2.wav"));
-    invaderMove2Sound->setVolume(0.5f);
+    invaderMove2Player = std::make_unique<QMediaPlayer>();
+    invaderMove2Output = std::make_unique<QAudioOutput>();
+    invaderMove2Player->setAudioOutput(invaderMove2Output.get());
+    invaderMove2Player->setSource(QUrl("qrc:/sounds/fastinvader2.wav"));
+    invaderMove2Output->setVolume(0.5f);
 
-    invaderMove3Sound = std::make_unique<QSoundEffect>();
-    invaderMove3Sound->setSource(QUrl("qrc:/sounds/fastinvader3.wav"));
-    invaderMove3Sound->setVolume(0.5f);
+    invaderMove3Player = std::make_unique<QMediaPlayer>();
+    invaderMove3Output = std::make_unique<QAudioOutput>();
+    invaderMove3Player->setAudioOutput(invaderMove3Output.get());
+    invaderMove3Player->setSource(QUrl("qrc:/sounds/fastinvader3.wav"));
+    invaderMove3Output->setVolume(0.5f);
 
-    invaderMove4Sound = std::make_unique<QSoundEffect>();
-    invaderMove4Sound->setSource(QUrl("qrc:/sounds/fastinvader4.wav"));
-    invaderMove4Sound->setVolume(0.5f);
+    invaderMove4Player = std::make_unique<QMediaPlayer>();
+    invaderMove4Output = std::make_unique<QAudioOutput>();
+    invaderMove4Player->setAudioOutput(invaderMove4Output.get());
+    invaderMove4Player->setSource(QUrl("qrc:/sounds/fastinvader4.wav"));
+    invaderMove4Output->setVolume(0.5f);
 }
 
-void SoundManager::onPlayPlayerShoot()
+void SoundManager::playPlayerShoot()
 {
-    if (playerShootSound->isLoaded()) {
-        playerShootSound->play();
+    playerShootPlayer->stop();
+    playerShootPlayer->play();
+}
+
+void SoundManager::playInvaderKilled()
+{
+    invaderKilledPlayer->stop();
+    invaderKilledPlayer->play();
+}
+
+void SoundManager::playPlayerKilled()
+{
+    playerKilledPlayer->stop();
+    playerKilledPlayer->play();
+}
+
+void SoundManager::playUfo()
+{
+    if (ufoPlayer->playbackState() != QMediaPlayer::PlayingState) {
+        ufoPlayer->play();
     }
 }
 
-void SoundManager::onPlayInvaderKilled()
+void SoundManager::playInvaderMove1()
 {
-    if (invaderKilledSound->isLoaded()) {
-        invaderKilledSound->play();
-    }
+    invaderMove1Player->stop();
+    invaderMove1Player->play();
 }
 
-void SoundManager::onPlayPlayerKilled()
+void SoundManager::playInvaderMove2()
 {
-    if (playerKilledSound->isLoaded()) {
-        playerKilledSound->play();
-    }
+    invaderMove2Player->stop();
+    invaderMove2Player->play();
 }
 
-void SoundManager::onPlayUfo()
+void SoundManager::playInvaderMove3()
 {
-    if (ufoSound->isLoaded() && !ufoSound->isPlaying()) {
-        ufoSound->play();
-    }
+    invaderMove3Player->stop();
+    invaderMove3Player->play();
 }
 
-void SoundManager::onPlayInvaderMove1()
+void SoundManager::playInvaderMove4()
 {
-    if (invaderMove1Sound->isLoaded()) {
-        invaderMove1Sound->play();
-    }
+    invaderMove4Player->stop();
+    invaderMove4Player->play();
 }
 
-void SoundManager::onPlayInvaderMove2()
+void SoundManager::stopUfo()
 {
-    if (invaderMove2Sound->isLoaded()) {
-        invaderMove2Sound->play();
-    }
-}
-
-void SoundManager::onPlayInvaderMove3()
-{
-    if (invaderMove3Sound->isLoaded()) {
-        invaderMove3Sound->play();
-    }
-}
-
-void SoundManager::onPlayInvaderMove4()
-{
-    if (invaderMove4Sound->isLoaded()) {
-        invaderMove4Sound->play();
-    }
-}
-
-void SoundManager::onStopUfo()
-{
-    ufoSound->stop();
+    ufoPlayer->stop();
 }
